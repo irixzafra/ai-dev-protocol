@@ -1,0 +1,155 @@
+# Development Protocol
+
+> SSOT for any AI agent working on this repository.
+> **Owner:** [Your name] — final authority on specs and merges
+
+This document defines the only valid way to ship code to this repository.
+Any agent that bypasses these gates creates work for the human.
+
+---
+
+## Session Start
+
+Before touching any code or docs:
+
+1. `git pull` — sync with remote
+2. Read `planning/LESSONS.md` for unresolved lessons:
+   ```bash
+   grep '\[pending\]$' planning/LESSONS.md
+   ```
+   Assign a graduation target before starting new work.
+3. Check `planning/MEMORY.md` — active decisions
+
+---
+
+## Session Close
+
+Before ending any session where the human gave feedback:
+
+1. **If the human corrected something** → capture AND graduate:
+   - Add entry to `planning/LESSONS.md` with graduation target
+   - Apply the lesson immediately to where it belongs (protocol, hook, runbook)
+   - Mark the lesson `[graduated → location]`
+2. **If architectural decisions were made** → update `planning/MEMORY.md`
+3. Commit — **stage the graduation destination alongside LESSONS.md**
+
+---
+
+## Mid-Session Correction Rule
+
+If the human corrects anything during a session:
+
+1. STOP current work immediately
+2. Capture the lesson in `planning/LESSONS.md` (brief, <3 lines)
+3. Graduate it now — do not defer to session close
+4. Resume the corrected approach
+
+Zero-latency capture prevents lessons from evaporating before session end.
+
+---
+
+## The Flow — Align → Execute → Verify → Reflect
+
+### Phase 1 — Alignment (required for any non-trivial task)
+
+The agent enters Plan Mode **proactively** — the human does not need to ask.
+
+1. **Explore**: read the codebase, understand existing patterns
+2. **Interview**: ask only questions that require human judgment (max 4-5)
+3. **Write the plan** with:
+   - What will be built
+   - What will NOT be built (explicit scope boundary)
+   - Files likely affected
+   - Acceptance criteria — verifiable, not vague
+4. **Human approves → work starts. No approval → no code.**
+
+---
+
+### Phase 2 — Execute (autonomous — human does not intervene)
+
+- Read the plan. Implement only what the plan says.
+- Execute completely without interrupting the human.
+- If Phase 3 — Verify fails: self-correct. Do not ask the human.
+- If the plan itself is wrong (not the implementation): stop, return to Phase 1.
+
+---
+
+### Phase 3 — Verify (automatic — no human intervention)
+
+| Check | Command | Gate |
+|---|---|---|
+| TypeScript | type-check exits 0 | Required |
+| Build | build exits 0 | Required |
+| Tests | No regressions vs baseline | Required |
+| Secrets | No API keys, passwords, tokens | Pre-commit hook (blocks) |
+
+If any gate fails: back to Phase 2. Phase 3 does not negotiate.
+
+---
+
+### Phase 4 — Reflect
+
+After Phase 3 passes, before requesting merge:
+
+1. What failed during execution? → add to `planning/LESSONS.md`
+2. Graduate each lesson to where it lives
+3. Architectural decisions? → update `planning/MEMORY.md`
+
+One reflection per task. The system gets smarter with every cycle.
+
+---
+
+## Scope Discipline
+
+Agents build what the spec says. Nothing more.
+
+- Do not add features not in the spec
+- Do not refactor code you weren't asked to touch
+- Do not add comments or error handling to code you didn't change
+
+If you notice something outside your scope: write it to WORKBOARD or a TODO. Do not fix it now.
+
+---
+
+## Git Rules
+
+```
+Commit format: type(scope): description — imperative, lowercase, ≤72 chars
+Types: feat, fix, refactor, chore, docs, test, perf
+```
+
+| Rule | Reason |
+|---|---|
+| feat/refactor: branch + PR | Protect main from partial work |
+| fix/chore/docs/test/perf: direct push allowed | Run verify locally first |
+| No `git add .` or `git add -A` | Prevents accidental secret commits |
+| No `git push --force` | Irreversible |
+
+---
+
+## Spec Format
+
+```markdown
+# [task-id] — [short title]
+
+**Status:** draft | approved | in-progress | done
+**Date:** YYYY-MM-DD
+
+## Intent
+[1-3 sentences from the human]
+
+## Scope — what will be built
+- [item]
+
+## Scope — what will NOT be built
+- [item]
+
+## Files likely affected
+- [path]
+
+## Acceptance criteria
+- [ ] [verifiable criterion]
+
+## Risk
+LOW / MEDIUM / HIGH — [reason]
+```
