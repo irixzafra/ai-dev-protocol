@@ -56,8 +56,35 @@ Zero-latency capture prevents lessons from evaporating before session end.
 
 The agent enters Plan Mode **proactively** — the human does not need to ask.
 
-1. **Explore**: read the codebase, understand existing patterns
-2. **Interview**: ask only questions that require human judgment (max 4-5)
+#### 1a. Classify the category
+
+Before reading any code, classify the task into one primary category:
+
+| Category | Trigger signals | Context to load before interviewing |
+|---|---|---|
+| **UI/Design** | button, card, layout, style, color, theme, visual component, spacing, responsive | Target component code · design tokens · existing shared components |
+| **Architecture** | refactor, structure, pattern, new page, api route, new abstraction, reorganize | `planning/MEMORY.md` · files affected · blast radius (what imports this?) |
+| **Backend/DB** | table, column, schema, RLS, query, migration, index, edge function, API endpoint | Current schema · RLS policies · queries touching this resource |
+| **Infra/Ops** | docker, deploy, container, server, env, port, nginx, SSL, cron | Server docs · docker-compose · active containers · rollback plan |
+| **Feature/Product** | new functionality, user story, user flow, full screen, external integration | Scope docs · WORKBOARD (collision check) · MEMORY.md |
+
+If the task spans multiple categories, pick the dominant one. If unclear, ask — one question.
+
+#### 1b. Classify the change scope
+
+| Class | Definition | Implication |
+|---|---|---|
+| **Isolated** | One file, no shared impact | Direct push after verify |
+| **Surface** | Multiple files, one product area | Branch + PR |
+| **Systemic** | Shared primitive, token, schema, or protocol | Branch + PR + all surfaces verified |
+| **Breaking** | Changes external contract (API, schema, auth) | Branch + PR + migration plan + human sign-off |
+
+If exploration reveals the task is a higher scope class than it appeared, say so before writing the plan.
+
+#### 1c. Explore, interview, plan
+
+1. **Explore**: read the category-relevant context (see 1a), then read the code
+2. **Interview**: ask only questions that require human judgment (max 4-5, category-appropriate)
 3. **Write the plan** with:
    - What will be built
    - What will NOT be built (explicit scope boundary)
