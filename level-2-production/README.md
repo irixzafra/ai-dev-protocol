@@ -15,9 +15,32 @@ Built on top of [Level 0](../level-0-core/) + [Level 1](../level-1-multi-agent/)
 
 | File | Purpose |
 |---|---|
+| `playbook.template.md` | Project-specific layer: stack, paths, patterns, ADR index |
 | `skills/dev-design/references/uncodixify.md` | 10 AI-generated UI anti-patterns to eliminate |
+| `skills/dev-backend/` | Backend anti-patterns + stub for project-specific patterns |
+| `skills/dev-security/` | OWASP Top 10 reference + auth/permissions patterns |
+| `skills/dev-architecture/` | ADR + PDR generation rules |
 | `workboard.template.md` | Task tracking with autonomous queue |
 | `program.template.md` | Autonomous optimization loop (inspired by karpathy/autoresearch) |
+
+## The playbook concept
+
+The protocol is generic. Skills are generic stubs. The **playbook** is the project-specific layer that fills in the blanks.
+
+```
+ai-dev-protocol/          ← generic (this repo)
+  level-2-production/
+    skills/               ← structure + anti-patterns, no project specifics
+
+your-project/             ← your playbook
+  dev.protocol.md         ← copied from level-0-core, with your overrides
+  playbook.md             ← your stack, paths, patterns, what NOT to do
+  docs/adr/               ← your architecture decisions
+  planning/LESSONS.md     ← your corrections history
+  skills/                 ← your filled-in skills (backend with your actual DB, etc.)
+```
+
+Agents load the playbook alongside the protocol. The playbook wins over generic skill advice when there's a conflict.
 
 ## When to add this level
 
