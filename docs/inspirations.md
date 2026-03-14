@@ -105,15 +105,63 @@ One agent plans (CEO), one reviews architecture (Engineer), one writes code (Cod
 
 ---
 
+## Aider — paul-gauthier/aider
+
+**Source:** [github.com/paul-gauthier/aider](https://github.com/paul-gauthier/aider)
+**The standard terminal-based AI coding agent.**
+
+Aider's key contribution to the field: the **repomap** — an AST-based map of the repository that gives the agent structural awareness without loading every file into context. The agent understands which functions call which, what's exported, and what's related — without reading it all.
+
+**What we take from it:** For very large projects, a `repomap.md` (or equivalent generated summary) is worth maintaining. An agent that knows the shape of the repo makes fewer unnecessary reads and avoids touching unrelated files.
+
+**What we do differently:** Our protocol addresses the *process* layer (align, verify, remember). Aider addresses the *context* layer (what does the agent see?). They're complementary: Aider's repomap improves the quality of Phase 1 (Alignment) by giving the agent better codebase awareness.
+
+---
+
+## SWE-agent — princeton-nlp/SWE-agent
+
+**Source:** [github.com/princeton-nlp/SWE-agent](https://github.com/princeton-nlp/SWE-agent)
+**Research agent for automated software engineering tasks.**
+
+SWE-agent introduced the concept of **Agent-Computer Interface (ACI)**: the idea that agents need tools designed specifically for them — not human interfaces adapted post-hoc.
+
+Key finding: agents perform significantly better when given purpose-built interfaces (structured file editing, filtered search, atomic task queues) than when using generic tools designed for humans.
+
+**What we take:** This is the theoretical justification for why the claim mechanism, the WORKBOARD format, and atomic spec files work. We designed them for agents, not humans. A WORKBOARD entry isn't a pretty card — it's a structured row an agent can claim, act on, and close without ambiguity.
+
+**What we do differently:** SWE-agent is a research framework. We're a protocol you add to an existing project with markdown files. Same insight, different application layer.
+
+---
+
+## Eugene Yan — LLM Patterns
+
+**Source:** [eugeneyan.com/writing/llm-patterns](https://eugeneyan.com/writing/llm-patterns/)
+**Industry-recognized patterns for LLM-based systems.**
+
+Eugene Yan's taxonomy of LLM system patterns includes: Evals, RAG, Fine-tuning, Caching, Guardrails, **Reflection**, and Self-Correction.
+
+The **Reflection** pattern is directly aligned with what we do:
+> "Have the LLM critique and revise its own outputs before returning them to the user."
+
+The **Self-Correction** pattern matches our self-improvement loop:
+> "Use external feedback (test results, human corrections) to iteratively improve outputs."
+
+**What we take:** Our program.md loop (init → run → log → compare → iterate) is an application of Self-Correction at the system level. Our Phase 4 (Reflect) is Reflection applied at the task level. Having academic grounding for these patterns strengthens the design rationale.
+
+**What we do differently:** Eugene Yan describes patterns in isolation. We compose them into a running system: Reflection (Phase 4) feeds Self-Correction (LESSONS.md graduation) which produces Guard-railed behavior (pre-commit hooks).
+
+---
+
 ## What this protocol solves that the others don't
 
-| Problem | Boris | Karpathy | Uncodixify | This protocol |
-|---|---|---|---|---|
-| Wrong output from misalignment | ⚠️ (plan mode) | ❌ | ❌ | ✅ structured alignment interview |
-| Lessons that disappear next session | ⚠️ (CLAUDE.md) | ❌ | ❌ | ✅ graduation system + pre-commit gate |
-| 4 agents colliding on same file | ❌ | ❌ | ❌ | ✅ claim mechanism |
-| AI-generated UI looking generic | ❌ | ❌ | ✅ | ✅ integrated as skill reference |
-| Autonomous optimization loops | ❌ | ✅ | ❌ | ✅ program.md pattern (generalized) |
-| Pre-approved tasks without supervision | ❌ | ❌ | ❌ | ✅ AUTO.* queue + claim mechanism |
-| Lessons not actually applied | ❌ | ❌ | ❌ | ✅ graduation gate in pre-commit |
-| Mid-session corrections lost | ⚠️ (session close) | ❌ | ❌ | ✅ zero-latency capture rule |
+| Problem | Boris | Karpathy | Aider | SWE-agent | This protocol |
+|---|---|---|---|---|---|
+| Wrong output from misalignment | ⚠️ plan mode | ❌ | ❌ | ❌ | ✅ structured alignment interview |
+| Lessons that disappear | ⚠️ CLAUDE.md | ❌ | ❌ | ❌ | ✅ graduation system + pre-commit gate |
+| 4 agents colliding | ❌ | ❌ | ❌ | ❌ | ✅ claim mechanism |
+| AI-generated UI being generic | ❌ | ❌ | ❌ | ❌ | ✅ Uncodixify as skill reference |
+| Autonomous optimization loops | ❌ | ✅ ML only | ❌ | ❌ | ✅ program.md (any system) |
+| Agent stuck in fix loops | ❌ | ❌ | ❌ | ❌ | ✅ rollback rule (fail 3x → reset) |
+| Codebase awareness in large repos | ❌ | ❌ | ✅ repomap | ⚠️ | ✅ repomap.md pattern (Level 2) |
+| Tools designed for agents not humans | ❌ | ❌ | ✅ | ✅ ACI | ✅ WORKBOARD, spec format, claim |
+| Reflection built into the loop | ⚠️ | ✅ | ❌ | ❌ | ✅ Phase 4 + graduation |

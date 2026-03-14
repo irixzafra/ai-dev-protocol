@@ -69,6 +69,7 @@ The agent enters Plan Mode **proactively** — the human does not need to ask.
 
 - Read the plan. Implement only what the plan says.
 - Execute completely without interrupting the human.
+- Use `planning/scratchpad.md` (gitignored) to track in-progress state: files touched, steps done, current blocker. If the session is interrupted or the model changes, the next agent reads the scratchpad and picks up from there.
 - If Phase 3 — Verify fails: self-correct. Do not ask the human.
 - If the plan itself is wrong (not the implementation): stop, return to Phase 1.
 
@@ -84,6 +85,8 @@ The agent enters Plan Mode **proactively** — the human does not need to ask.
 | Secrets | No API keys, passwords, tokens | Pre-commit hook (blocks) |
 
 If any gate fails: back to Phase 2. Phase 3 does not negotiate.
+
+**Rollback rule:** If verification fails 3 times in a row on the same issue, stop self-correcting. Do `git stash` or reset to the last clean commit, then return to Phase 1 with the new information. Agents that keep patching a broken approach usually make it worse.
 
 ---
 

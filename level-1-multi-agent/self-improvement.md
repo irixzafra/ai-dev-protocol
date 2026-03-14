@@ -123,6 +123,20 @@ git commit -m "docs(planning): session close YYYY-MM-DD"
 
 ---
 
+## LESSONS.md pruning
+
+LESSONS.md is an inbox, not a ledger. Let it grow unbounded and it becomes noise.
+
+**Rule:** When LESSONS.md exceeds 50 lines, create a task to refactor it:
+- Group similar `[graduated]` lessons into a single "Principles" summary
+- Delete graduated lessons older than 3 months (they're already in the protocol/skill/hook)
+- Keep all `[pending]` and `[reference]` entries untouched
+- Keep the most recent 5 graduated entries as examples
+
+The point is that LESSONS.md stays readable and uses minimal tokens in context.
+
+---
+
 ## The compound effect
 
 Session 1: agent makes mistake → lesson captured → protocol updated

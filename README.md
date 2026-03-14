@@ -74,6 +74,7 @@ Con R1+R2+R3 ya tienes un sistema estructurado. El resto del protocolo son capas
 - Entrevista de alineación estructurada (con "non-goals" explícitos)
 - Cola de tareas con claim atómico (los agentes no se pisan)
 - Adaptadores por modelo: el protocolo funciona igual en cualquier LLM
+- `scratchpad.md` (gitignored): estado en-vuelo entre sesiones — si cambia el modelo, el siguiente agente sabe exactamente dónde se quedó el anterior
 
 **→ [`level-1-multi-agent/`](level-1-multi-agent/)**
 
@@ -139,10 +140,13 @@ ai-dev-protocol/
 │   │   ├── workboard.template.md         ← tracking con cola autónoma
 │   │   └── program.template.md           ← loop de optimización
 │   └── skills/
-│       ├── dev-design/uncodixify.md      ← 10 patrones UI de IA a eliminar
-│       ├── dev-backend/                  ← 10 anti-patterns backend
-│       ├── dev-security/                 ← OWASP Top 10 para agentes
-│       └── dev-architecture/             ← ADR/PDR + anti-patterns estructurales
+│       ├── dev-design/        ← 10 patrones UI de IA a eliminar
+│       ├── dev-backend/       ← 10 anti-patterns backend
+│       ├── dev-security/      ← OWASP Top 10 para agentes
+│       ├── dev-architecture/  ← ADR/PDR + anti-patterns estructurales
+│       ├── dev-performance/   ← waterfalls, listas sin virtualizar, bundle size
+│       ├── dev-accessibility/ ← WCAG 2.1 AA — los LLMs ignoran a11y por defecto
+│       └── dev-testing-strategy/ ← tests de comportamiento, no de implementación
 │
 ├── examples/
 │   ├── saas-nextjs/                      ← playbook de ejemplo (Next.js + Supabase)
