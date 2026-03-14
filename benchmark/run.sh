@@ -80,17 +80,39 @@ echo ""
 
 extract_task() {
   local task_id="$1"
-  # Extract lines between "## $task_id" and the next "## " or EOF
-  awk "/^## $task_id —/,/^## [A-Z][0-9]+ —|^$/{
-    if (/^## [A-Z][0-9]+ —/ && !/^## $task_id —/) exit
-    print
-  }" "$TASKS_FILE"
+  # Extract lines from "## B01" header until the next "## B" header (portable, no em-dash dependency)
+  python3 - "$TASKS_FILE" "$task_id" <<'PYEOF'
+import sys
+filename, task_id = sys.argv[1], sys.argv[2]
+in_task = False
+with open(filename) as f:
+    for line in f:
+        if line.startswith(f"## {task_id} ") or line.startswith(f"## {task_id}\n"):
+            in_task = True
+        elif in_task and line.startswith("## B") and not line.startswith(f"## {task_id}"):
+            break
+        if in_task:
+            print(line, end="")
+PYEOF
 }
 
 get_task_prompt() {
   local task_id="$1"
   # Extract content inside the first ```...``` block in the task
-  extract_task "$task_id" | awk '/^```$/{found=1; next} found && /^```$/{exit} found{print}'
+  extract_task "$task_id" | python3 -c "
+import sys
+lines = sys.stdin.readlines()
+in_block = False
+for line in lines:
+    stripped = line.rstrip()
+    if stripped == '\`\`\`' and not in_block:
+        in_block = True
+        continue
+    if stripped == '\`\`\`' and in_block:
+        break
+    if in_block:
+        print(line, end='')
+"
 }
 
 get_task_expect() {
