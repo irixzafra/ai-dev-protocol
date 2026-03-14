@@ -37,8 +37,11 @@ cp level-0-core/templates/lessons.template.md your-project/planning/LESSONS.md
 touch your-project/planning/MEMORY.md
 
 # 4. Install pre-commit hook (optional but recommended)
-cp level-0-core/pre-commit your-project/.husky/pre-commit
-chmod +x your-project/.husky/pre-commit
+# Native git (no dependencies):
+cp level-0-core/pre-commit your-project/.git/hooks/pre-commit
+chmod +x your-project/.git/hooks/pre-commit
+# With Husky (if your project uses it):
+# cp level-0-core/pre-commit your-project/.husky/pre-commit && chmod +x your-project/.husky/pre-commit
 ```
 
 ## When to add more levels

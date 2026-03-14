@@ -53,7 +53,8 @@ Before doing anything:
 3. Read the last 3 entries in `planning/dev-log.md` — recent session context
 4. Run: grep '\[pending\]$' planning/LESSONS.md — resolve before starting new work
 
-Then ask: "What should I work on?" or read `planning/WORKBOARD.md` for the next task.
+Then ask: "What should I work on?"
+If `planning/WORKBOARD.md` exists, read it for the next queued task.
 EOF
 echo "✓ .openhands/microagents/repo.md (auto-loads protocol in OpenHands)"
 
@@ -63,6 +64,7 @@ echo "  1. Edit CLAUDE.md — fill in your tech stack and paths"
 echo "  2. Tell your agent: 'Read dev.protocol.md before doing anything.'"
 echo "  3. If using OpenHands: the microagent file loads the protocol automatically"
 echo "  4. Optional: install the pre-commit hook"
-echo "     cp level-0-core/pre-commit .husky/pre-commit && chmod +x .husky/pre-commit"
+echo "     Native git:  cp level-0-core/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+echo "     With Husky:  cp level-0-core/pre-commit .husky/pre-commit && chmod +x .husky/pre-commit"
 echo ""
 echo "Full docs: https://github.com/irixzafra/ai-dev-protocol"
