@@ -17,7 +17,7 @@ Read the self-improvement loop: `../SELF_IMPROVEMENT.md`
 
 Loading every skill file on every task burns context and degrades quality ("lost in the middle" effect).
 
-**Always load:** `dev.protocol.md` + `planning/LESSONS.md` + `planning/project.playbook.md`
+**Always load:** `dev.protocol.md` + `planning/LESSONS.md` + `planning/project.playbook.md` + last 3 entries of `planning/dev-log.md`
 
 **Load on demand — only when the task requires it:**
 

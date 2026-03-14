@@ -120,6 +120,7 @@ ai-dev-protocol/
 │       ├── agent-config.template.md      ← config del agente (punto de partida)
 │       ├── lessons.template.md           ← inbox de correcciones
 │       ├── backlog.template.md           ← captura de ideas antes de ser tareas
+│       ├── dev-log.template.md           ← memoria episódica (lo que pasó esta semana)
 │       ├── adr.template.md               ← Architecture Decision Record
 │       └── pdr.template.md               ← Preliminary Design Review
 │

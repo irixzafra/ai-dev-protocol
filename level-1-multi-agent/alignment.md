@@ -182,6 +182,35 @@ If two plans claim the same file → escalate to the human before starting.
 
 ---
 
+## Supervisor-Worker pattern — for complex tasks
+
+Use when a task affects ≥5 files or requires coordinating changes across multiple systems. A single agent trying to hold the full map AND implementation details simultaneously degrades quality.
+
+**Step 1 — Supervisor phase:**
+
+Spawn a subagent (or enter a focused context) with a single mandate: understand the codebase, not change it.
+- Read all relevant code and existing patterns
+- Map dependencies and cross-file impact
+- Produce `specs/active/[task-id]-design.md` with:
+  - Current state (how things work now)
+  - Proposed changes (what will change and why)
+  - Risks (what could break)
+  - Open questions (what requires human judgment before implementation)
+- Write nothing else. No implementation code.
+
+**Step 2 — Worker phase:**
+
+A separate agent (or new context) reads only the design doc + the spec. Implements exactly what the design says.
+- Does not re-read the full codebase — trusts the design doc
+- Escalates back to Supervisor if the design doc has a gap
+- Does not deviate from the design without a new Supervisor round
+
+**Why this works:** The Supervisor holds the map. The Worker holds the implementation details. Neither degrades from holding both.
+
+**When NOT to use:** Tasks ≤4 files. Standard alignment interview is sufficient — the Supervisor-Worker adds overhead that isn't warranted.
+
+---
+
 ## Alignment interview for autonomous tasks
 
 AUTO.* tasks skip the alignment interview because:

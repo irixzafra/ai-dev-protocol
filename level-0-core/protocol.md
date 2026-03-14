@@ -13,12 +13,13 @@ Any agent that bypasses these gates creates work for the human.
 Before touching any code or docs:
 
 1. `git pull` — sync with remote
-2. Read `planning/LESSONS.md` for unresolved lessons:
+2. Read the last 3 entries in `planning/dev-log.md` — understand current state before reading any code
+3. Read `planning/LESSONS.md` for unresolved lessons:
    ```bash
    grep '\[pending\]$' planning/LESSONS.md
    ```
    Assign a graduation target before starting new work.
-3. Check `planning/MEMORY.md` — active decisions
+4. Check `planning/MEMORY.md` — active decisions
 
 ---
 
@@ -26,12 +27,13 @@ Before touching any code or docs:
 
 Before ending any session where the human gave feedback:
 
-1. **If the human corrected something** → capture AND graduate:
+1. **Write a dev-log entry** → append to `planning/dev-log.md` (max 4 bullets: completed, temp decisions, oddities, next step)
+2. **If the human corrected something** → capture AND graduate:
    - Add entry to `planning/LESSONS.md` with graduation target
    - Apply the lesson immediately to where it belongs (protocol, hook, runbook)
    - Mark the lesson `[graduated → location]`
-2. **If architectural decisions were made** → update `planning/MEMORY.md`
-3. Commit — **stage the graduation destination alongside LESSONS.md**
+3. **If architectural decisions were made** → update `planning/MEMORY.md`
+4. Commit — **stage the graduation destination alongside LESSONS.md**
 
 ---
 
@@ -73,6 +75,18 @@ The agent enters Plan Mode **proactively** — the human does not need to ask.
 - If Phase 3 — Verify fails: self-correct. Do not ask the human.
 - If the plan itself is wrong (not the implementation): stop, return to Phase 1.
 
+**Micro-iteration rule:** Do not write more than 50-100 lines without running the type-checker or linter (`tsc --noEmit`, `eslint`, or equivalent). Use compiler feedback step-by-step to correct types and broken references *as you go* — before considering a function complete and moving to the next file. Catching errors early is cheaper than unwinding 300 lines of cascading mistakes.
+
+**Shadow branching — for persistent architectural uncertainty:**
+If Phase 1 leaves a genuine uncertainty between two approaches that cannot be resolved without implementation:
+1. Create `shadow/[task-id]-a` and `shadow/[task-id]-b` branches
+2. Implement each approach in its branch
+3. Run full verification on both
+4. Compare outcomes (type errors, test failures, code size, clarity)
+5. Delete the losing branch. PR the winner with a one-line rationale: "Chose A over B because [concrete reason]."
+
+Use shadow branches only when the approaches are functionally different. Never for style preferences.
+
 ---
 
 ### Phase 3 — Verify (automatic — no human intervention)
@@ -108,6 +122,7 @@ After Phase 3 passes, before requesting merge:
 1. What failed during execution? → add to `planning/LESSONS.md`
 2. Graduate each lesson to where it lives
 3. Architectural decisions? → update `planning/MEMORY.md`
+4. Write a dev-log entry → append to `planning/dev-log.md`
 
 One reflection per task. The system gets smarter with every cycle.
 

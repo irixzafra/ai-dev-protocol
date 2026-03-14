@@ -137,6 +137,35 @@ The point is that LESSONS.md stays readable and uses minimal tokens in context.
 
 ---
 
+## Dev log — short-term episodic memory
+
+LESSONS.md captures permanent rules. Scratchpad captures in-flight state. MEMORY.md captures architectural decisions.
+
+None of them answer: *"what happened in this codebase in the last few days?"*
+
+`planning/dev-log.md` fills that gap:
+
+| What | Where |
+|---|---|
+| Permanent rules (never repeat this mistake) | LESSONS.md |
+| In-flight state (where I am mid-task) | scratchpad.md |
+| Architectural decisions (locked choices) | MEMORY.md |
+| What happened recently (situational awareness) | **dev-log.md** |
+
+**Format:** One timestamped entry per session. Max 4 bullets:
+- What was completed
+- Temporary decisions taken (and why — so the next agent can reverse them knowingly)
+- Blockers or oddities encountered
+- Logical next step
+
+**Pruning rule:** Delete entries older than 7 days. Keep the file under 30 lines.
+
+**The human value:** A maintainer opening the project after a weekend can read the last 3 entries and immediately understand the current state — without decoding git commits or asking the agent to re-explain.
+
+→ Template: `level-0-core/templates/dev-log.template.md`
+
+---
+
 ## The compound effect
 
 Session 1: agent makes mistake → lesson captured → protocol updated
