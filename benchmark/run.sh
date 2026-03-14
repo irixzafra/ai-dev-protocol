@@ -207,22 +207,19 @@ run_task() {
   echo -n "  $task_id ... "
 
   local response
+  local _tmpjson
+  _tmpjson=$(mktemp /tmp/benchmark_req.XXXXXX.json)
+  jq -n \
+    --arg model "$MODEL" \
+    --arg system "$SYSTEM_PROMPT" \
+    --arg user "$task_prompt" \
+    '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_tokens:1500,temperature:0.1}' \
+    > "$_tmpjson"
   response=$(curl -s "https://openrouter.ai/api/v1/chat/completions" \
     -H "Authorization: Bearer $OR_API_KEY" \
     -H "Content-Type: application/json" \
-    -d "$(jq -n \
-      --arg model "$MODEL" \
-      --arg system "$SYSTEM_PROMPT" \
-      --arg user "$task_prompt" \
-      '{
-        model: $model,
-        messages: [
-          {role: "system", content: $system},
-          {role: "user", content: $user}
-        ],
-        max_tokens: 1500,
-        temperature: 0.1
-      }')" | jq -r '.choices[0].message.content // .error.message // "ERROR"')
+    --data-binary "@$_tmpjson" | jq -r '.choices[0].message.content // .error.message // "ERROR"')
+  rm -f "$_tmpjson"
 
   # Score
   local score_result
@@ -274,9 +271,10 @@ COUNT=0
 
 if [[ "$TASK_FILTER" == "all" ]]; then
   for t in "${TASKS[@]}"; do
-    run_task "$t"
-    task_score=$(auto_score "$t" "$(cat "$RUN_DIR/$t.md" 2>/dev/null | tail -n +15 | head -50)" | cut -d'|' -f1)
-    TOTAL=$((TOTAL + task_score))
+    task_output=$(run_task "$t")
+    echo "$task_output"
+    task_score=$(echo "$task_output" | grep -oE '[0-9]+/10' | head -1 | cut -d'/' -f1)
+    TOTAL=$((TOTAL + ${task_score:-0}))
     COUNT=$((COUNT + 1))
   done
 else
