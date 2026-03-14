@@ -84,6 +84,52 @@ Con R1+R2+R3 ya tienes un sistema estructurado. El resto del protocolo son capas
 
 ---
 
+## Nomenclatura e Industria
+
+Si vienes de leer papers o usar frameworks de agentes, estos son los equivalentes exactos:
+
+| Concepto en este protocolo | Archivo | Estándar de industria (2024-2026) |
+|---|---|---|
+| Punto de entrada del agente | `CLAUDE.md` / `AGENTS.md` | Workspace Rules (`.cursorrules`, `.windsurfrules`, `copilot-instructions.md`) |
+| Aprendizaje acumulado | `LESSONS.md` | **Semantic Memory** — conocimiento persistente que el agente recupera por relevancia |
+| Memoria de sesión | `DEV_LOG.md` | **Episodic Memory** — registro temporal de eventos recientes (ventana de contexto extendida) |
+| Freno de emergencia | `BLOCKER.md` + escalation rule | **HITL Handoff** (Human-in-the-Loop) — el agente se detiene y transfiere control al humano |
+| Skills por dominio | `skills/dev-security/`, `skills/dev-design/`... | **MCP / Static Tools** — contexto especializado cargado on-demand, no siempre en el prompt |
+| Loop principal | R1 Align → R2 Execute → R3 Verify | **ReAct Loop** (Reason → Act → Observe) — el ciclo estándar de agentes autónomos |
+
+El protocolo no inventa nuevos conceptos. Implementa los estándares con archivos Markdown que cualquier LLM puede leer sin plugins ni SDKs.
+
+### El loop como ReAct
+
+```mermaid
+flowchart LR
+    A["R1 — Align\n(Reason)"] --> B["R2 — Execute\n(Act)"]
+    B --> C["R3 — Verify\n(Observe)"]
+    C -->|"✅ gates pass"| D["Reflect + commit"]
+    C -->|"❌ fail ×3"| E["HITL Handoff\nBLOCKER.md"]
+    D --> A
+```
+
+---
+
+## Compatibilidad con IDEs y herramientas
+
+`CLAUDE.md` es el punto de entrada para Claude Code. El mismo archivo funciona en cualquier IDE renombrándolo:
+
+| Herramienta | Nombre del archivo |
+|---|---|
+| Claude Code | `CLAUDE.md` |
+| Cursor | `.cursorrules` |
+| Windsurf | `.windsurfrules` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Codex / OpenAI | `AGENTS.md` |
+| Gemini | `GEMINI.md` |
+| Cualquier agente | carga `dev.protocol.md` como system prompt |
+
+Los adaptadores en [`level-1-multi-agent/adapters/`](level-1-multi-agent/adapters/) ya incluyen las variantes por modelo.
+
+---
+
 ## Niveles — empieza donde estás, escala cuando lo necesites
 
 ### Nivel 0 — Un agente, cualquier proyecto
