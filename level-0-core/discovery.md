@@ -163,3 +163,39 @@ Idea: [describe it here]
 ```
 
 This is optional. The manual approach (paste the file or reference it in your first message) works for 80% of use cases.
+
+---
+
+## Legacy codebase mode — cold start
+
+Use this when you're dropping the protocol into an **existing codebase** with no documentation, unknown stack, or inherited patterns you don't fully understand yet.
+
+Instead of answering the discovery interview yourself, the agent reads the code and generates the playbook for you to review and correct.
+
+```
+You are helping onboard an AI protocol into an existing codebase.
+Do NOT ask me questions yet. First, do a structured code analysis.
+
+Step 1 — Explore the repository:
+- Read the root package.json / pyproject.toml / go.mod (whichever exists)
+- List the top-level directory structure
+- Read 2-3 representative files from the main source directory
+- Check for existing config files: tsconfig.json, .eslintrc, docker-compose.yml, .env.example
+
+Step 2 — Deduce and document:
+Based on what you found, generate a draft `planning/project.playbook.md` with:
+- Stack (what you detected, not what I told you)
+- Key paths (where the main source, tests, and config live)
+- Patterns you observed in the code (naming conventions, folder structure, import patterns)
+- Anti-patterns you spotted (things that look inconsistent or risky)
+- Open questions (things you couldn't determine from the code alone)
+
+Step 3 — Present for review:
+Show me the generated playbook and the open questions.
+I will correct what's wrong and answer the questions.
+Then you update the playbook and save it.
+
+Start with Step 1 now. Do not ask questions until Step 3.
+```
+
+This typically takes one session. The output is a playbook that reflects the codebase as it actually is — not as it was supposed to be.

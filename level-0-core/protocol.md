@@ -88,6 +88,17 @@ If any gate fails: back to Phase 2. Phase 3 does not negotiate.
 
 **Rollback rule:** If verification fails 3 times in a row on the same issue, stop self-correcting. Do `git stash` or reset to the last clean commit, then return to Phase 1 with the new information. Agents that keep patching a broken approach usually make it worse.
 
+**Escalation rule:** If the rollback leads to a second round of Phase 1 and you still cannot make progress, escalate to the human:
+1. Create branch `ai-blocked/[task-id]`
+2. Commit partial work: `git commit -m "wip: blocked on [task-id] — see BLOCKER.md"`
+3. Write `BLOCKER.md` in the repo root:
+   - What was attempted (exact approach)
+   - What failed (exact error or behavior)
+   - What was ruled out (approaches that don't work and why)
+   - What the human needs to decide or provide
+4. Open a GitHub issue referencing the branch and BLOCKER.md
+5. Stop. Do not attempt the task again until the human responds.
+
 ---
 
 ### Phase 4 — Reflect

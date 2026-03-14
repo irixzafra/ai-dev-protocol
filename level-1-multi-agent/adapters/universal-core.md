@@ -13,6 +13,28 @@ Read the self-improvement loop: `../SELF_IMPROVEMENT.md`
 
 ---
 
+## Context tiering — load only what you need
+
+Loading every skill file on every task burns context and degrades quality ("lost in the middle" effect).
+
+**Always load:** `dev.protocol.md` + `planning/LESSONS.md` + `planning/project.playbook.md`
+
+**Load on demand — only when the task requires it:**
+
+| Load this skill | When |
+|---|---|
+| `dev-security/` | Touching auth, sessions, permissions, public endpoints, or user input |
+| `dev-backend/` | Writing API routes, DB queries, background jobs |
+| `dev-performance/` | Building data-heavy pages, lists, dashboards, or anything with "this might be slow" |
+| `dev-accessibility/` | Generating or modifying any UI component with interactive elements |
+| `dev-testing-strategy/` | Writing or reviewing tests |
+| `dev-architecture/` | Making decisions that are hard to reverse |
+| `dev-design/uncodixify.md` | Any frontend component or layout |
+
+If unsure: skip the skill. Load it only when you're about to touch that domain.
+
+---
+
 ## Core rules (universal)
 
 1. **Plan before code.** For any task with 3+ steps or architectural decisions: run the alignment interview, write the spec, get approval. No code before approval.
