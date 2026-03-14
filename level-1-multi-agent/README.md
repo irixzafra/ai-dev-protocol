@@ -40,7 +40,7 @@ cp level-1-multi-agent/adapters/gemini.md your-project/GEMINI.md
 cp level-1-multi-agent/adapters/qwen.md your-project/QWEN.md
 
 # 3. Add WORKBOARD with autonomous queue
-cp level-2-production/workboard.template.md your-project/planning/WORKBOARD.md
+cp level-2-production/templates/workboard.template.md your-project/planning/WORKBOARD.md
 ```
 
 ## The claim mechanism (collision prevention)

@@ -47,7 +47,7 @@ Structure: `init_experiment → run_experiment → log_experiment → compare_vs
 
 **What we do differently:** Karpathy's focus is ML research (hyperparameter tuning, architecture search). We generalized the pattern to any optimization loop: RAG tuning, performance baselines, UI quality loops.
 
-→ See `templates/program.template.md`
+→ See `level-2-production/templates/program.template.md`
 
 ---
 

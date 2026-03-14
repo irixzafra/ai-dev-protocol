@@ -106,7 +106,7 @@ That's it. The agent knows your project from minute 1.
 Skills in `level-2-production/skills/` are generic stubs.
 The playbook fills in the blanks.
 
-Example: `dev-backend/SKILL.md` says "validate at the boundary using your schema library."
+Example: `dev-backend/skill.md` says "validate at the boundary using your schema library."
 Your playbook says `{{validation_library}}: Zod`.
 The agent reads both and applies Zod — without you having to say it.
 

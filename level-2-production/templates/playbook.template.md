@@ -6,7 +6,7 @@
 > The protocol tells agents HOW to work.
 > The playbook tells agents WHERE things are, WHAT stack is being used, and WHAT patterns we follow here.
 >
-> → To generate this file from scratch: see `level-0-core/DISCOVERY.md`
+> → To generate this file from scratch: see `level-0-core/discovery.md`
 
 ---
 

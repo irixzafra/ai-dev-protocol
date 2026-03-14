@@ -17,8 +17,8 @@ These three requirements are the non-negotiable minimum. Every other layer in th
 | File | Purpose |
 |---|---|
 | `protocol.md` | The core development loop (copy to your project as `dev.protocol.md`) |
-| `lessons.template.md` | Corrections inbox with graduation model |
-| `claude.template.md` | Agent config starting point (Claude Code) |
+| `templates/lessons.template.md` | Corrections inbox with graduation model |
+| `templates/agent-config.template.md` | Agent config starting point (Claude Code) |
 | `pre-commit` | Lite hook: secrets check + lessons graduation gate |
 
 ## Setup
@@ -28,12 +28,12 @@ These three requirements are the non-negotiable minimum. Every other layer in th
 cp level-0-core/protocol.md your-project/dev.protocol.md
 
 # 2. Create agent config
-cp level-0-core/claude.template.md your-project/CLAUDE.md
+cp level-0-core/templates/agent-config.template.md your-project/CLAUDE.md
 # Edit: fill in your tech stack and paths
 
 # 3. Create planning files
 mkdir -p your-project/planning
-cp level-0-core/lessons.template.md your-project/planning/LESSONS.md
+cp level-0-core/templates/lessons.template.md your-project/planning/LESSONS.md
 touch your-project/planning/MEMORY.md
 
 # 4. Install pre-commit hook (optional but recommended)

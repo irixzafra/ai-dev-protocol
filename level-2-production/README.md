@@ -15,13 +15,13 @@ Built on top of [Level 0](../level-0-core/) + [Level 1](../level-1-multi-agent/)
 
 | File | Purpose |
 |---|---|
-| `playbook.template.md` | Project-specific layer: stack, paths, patterns, ADR index |
+| `templates/playbook.template.md` | Project-specific layer: stack, paths, patterns, ADR index |
 | `skills/dev-design/references/uncodixify.md` | 10 AI-generated UI anti-patterns to eliminate |
 | `skills/dev-backend/` | Backend anti-patterns + stub for project-specific patterns |
 | `skills/dev-security/` | OWASP Top 10 reference + auth/permissions patterns |
 | `skills/dev-architecture/` | ADR + PDR generation rules |
-| `workboard.template.md` | Task tracking with autonomous queue |
-| `program.template.md` | Autonomous optimization loop (inspired by karpathy/autoresearch) |
+| `templates/workboard.template.md` | Task tracking with autonomous queue |
+| `templates/program.template.md` | Autonomous optimization loop (inspired by karpathy/autoresearch) |
 
 ## The playbook concept
 
@@ -57,11 +57,11 @@ cp level-2-production/skills/dev-design/references/uncodixify.md \
    your-project/.claude/skills/dev-design/references/
 
 # 2. Task tracking
-cp level-2-production/workboard.template.md your-project/planning/WORKBOARD.md
+cp level-2-production/templates/workboard.template.md your-project/planning/WORKBOARD.md
 
 # 3. Optimization loop (if needed)
 # Copy program.template.md next to the system you want to optimize
-cp level-2-production/program.template.md your-project/[system]/program.md
+cp level-2-production/templates/program.template.md your-project/[system]/program.md
 # Edit: fill in objective, metrics, parameters, eval set
 ```
 

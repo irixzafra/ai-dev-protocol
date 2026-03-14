@@ -45,8 +45,8 @@ Con R1+R2+R3 ya tienes un sistema mucho mejor que hablarle directamente a Claude
 
 ```bash
 cp level-0-core/protocol.md your-project/dev.protocol.md
-cp level-0-core/claude.template.md your-project/CLAUDE.md
-cp level-0-core/lessons.template.md your-project/planning/LESSONS.md
+cp level-0-core/templates/agent-config.template.md your-project/CLAUDE.md
+cp level-0-core/templates/lessons.template.md your-project/planning/LESSONS.md
 ```
 
 ---
@@ -107,8 +107,8 @@ ai-dev-protocol/
 │
 ├── level-0-core/                    ← R1+R2+R3 — mínimo viable
 │   ├── protocol.md                  ← el loop completo
-│   ├── lessons.template.md          ← inbox de correcciones
-│   ├── claude.template.md           ← config de agente (punto de partida)
+│   │   ├── lessons.template.md          ← inbox de correcciones
+│   │   ├── agent-config.template.md     ← config de agente (punto de partida)
 │   └── pre-commit                   ← hook lite: secrets + graduación
 │
 ├── level-1-multi-agent/             ← R4+R5 — coordinación + portabilidad
@@ -123,8 +123,8 @@ ai-dev-protocol/
 │       └── qwen.md                  ← overrides Qwen
 │
 ├── level-2-production/              ← R6+R7 — calidad + optimización
-│   ├── workboard.template.md        ← tracking con cola autónoma
-│   ├── program.template.md          ← loop de optimización autónomo
+│   ├── templates/workboard.template.md    ← tracking con cola autónoma
+│   ├── templates/program.template.md       ← loop de optimización autónomo
 │   └── skills/dev-design/references/
 │       └── uncodixify.md            ← 10 patrones de UI a eliminar
 │

@@ -1,6 +1,6 @@
 # Project Playbook: SaaS Starter (Next.js + Supabase)
 
-> Example output from running the discovery prompt in `level-0-core/DISCOVERY.md`.
+> Example output from running the discovery prompt in `level-0-core/discovery.md`.
 > This is what a real generated playbook looks like — not a template, but a filled-in instance.
 
 ---
