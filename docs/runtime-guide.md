@@ -54,15 +54,35 @@ Para gestionar el proyecto desde el móvil. Un agente ligero escrito en Go: bina
 
 **Por qué Go:** Compila a un solo ejecutable estático (~25 MB). Lo copias al VPS, lo arrancas, y ya está. No hay pip, no hay venv, no hay Docker si no quieres.
 
-**Cómo inyectar el protocolo:**
+**Motor recomendado: [GoClaw](https://github.com/nextlevelbuilder/goclaw)** — 750⭐, 13+ proveedores LLM, 7 canales (Telegram, WhatsApp, Discord...), Docker nativo.
+
+**Cómo inyectar el protocolo en GoClaw:**
+
+GoClaw usa un archivo `SOUL.md` como identidad del agente. Es exactamente donde va el protocolo.
 
 ```bash
-# Concepto general — adapta a tu agente Go
-./agente \
-  --protocol-file=dev.protocol.md \
-  --playbook=planning/project.playbook.md \
-  --telegram-token=TU_TOKEN \
-  --task="Inicia Phase 1 y avísame por Telegram si hay un BLOCKER"
+# 1. Clona y genera secretos
+git clone https://github.com/nextlevelbuilder/goclaw /opt/dev-runner
+cd /opt/dev-runner && bash prepare-env.sh  # genera GATEWAY_TOKEN + ENCRYPTION_KEY
+
+# 2. Configura .env (provider + telegram + postgres)
+cp .env.example .env && nano .env
+
+# 3. Crea el SOUL.md con el protocolo
+mkdir -p skills
+# → copia el contenido de dev.protocol.md + planning/project.playbook.md en skills/SOUL.md
+
+# 4. Monta el SOUL y arranca
+cat > docker-compose.override.yml << 'EOF'
+services:
+  goclaw:
+    volumes:
+      - ./skills:/app/skills:ro
+    ports:
+      - "127.0.0.1:52010:18790"
+EOF
+
+docker compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.override.yml up -d --build
 ```
 
 **Flujo de trabajo:**
@@ -72,7 +92,7 @@ Para gestionar el proyecto desde el móvil. Un agente ligero escrito en Go: bina
 4. Si se bloquea, te manda el `BLOCKER.md` por chat
 5. Tú respondes con la decisión — el agente retoma
 
-**Nota:** Si tienes tu propio sistema de agentes en Go, inyecta `dev.protocol.md` como system prompt y sigue el mismo patrón.
+**Nota:** Si usas otro sistema de agentes en Go, inyecta `dev.protocol.md` como system prompt y sigue el mismo patrón.
 
 ---
 
