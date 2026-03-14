@@ -178,6 +178,8 @@ ai-dev-protocol/
 
 → Cómo ejecutar agentes 24/7 con FOSS (VPS + OpenHands + LiteLLM): [`docs/runtime-guide.md`](docs/runtime-guide.md)
 
+→ Cómo exponer el sistema a perfiles no técnicos (GitHub Projects + Pages + DEV_LOG): [`docs/stakeholders.md`](docs/stakeholders.md)
+
 ---
 
 ## Probado en producción
