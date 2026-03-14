@@ -1,5 +1,9 @@
 # AI Dev Protocol
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Version](https://img.shields.io/badge/version-v0.2.0-blue)
+![No dependencies](https://img.shields.io/badge/dependencies-none-green)
+
 **Un conjunto de reglas + templates que le dicen a tu agente de IA cómo trabajar en tu proyecto.**
 
 Sin código. Sin dependencias. Solo archivos Markdown que copias a tu repo y tu agente lee.
@@ -7,7 +11,33 @@ Funciona con Claude Code, Codex, Gemini, Qwen, o cualquier LLM.
 
 ---
 
-## El problema
+## Si no eres desarrollador/a
+
+No necesitas tocar código para usar este sistema.
+
+```
+[Tú — desde el navegador]
+   → Abres GitHub y creas una tarjeta: "Quiero que los usuarios puedan restablecer su contraseña"
+   → Rellenas un formulario simple: qué quieres, quién se beneficia, qué no debe cambiar
+
+[La IA — en el servidor]
+   → Lee tu tarjeta
+   → Te pide confirmación antes de tocar nada
+   → Implementa el código, pasa los tests, cierra la tarjeta
+
+[Tú — a la mañana siguiente]
+   → Ves la tarjeta en "Hecho"
+   → Revisas el resultado
+   → Apruebas o pides ajustes con un comentario
+```
+
+El desarrollador instala el protocolo una vez. Después, tú y la IA trabajáis directamente.
+
+→ Guía completa para perfiles no técnicos: [`docs/stakeholders.md`](docs/stakeholders.md)
+
+---
+
+## El problema (para desarrolladores)
 
 Si usas IA para programar, estos 3 fallos te son familiares:
 
@@ -117,10 +147,12 @@ ai-dev-protocol/
 │   ├── pre-commit                        ← hook lite: secrets + graduación
 │   ├── discovery.md                      ← genera el playbook de tu proyecto
 │   └── templates/
+│       ├── README.md                     ← qué copiar al proyecto vs qué es referencia
 │       ├── agent-config.template.md      ← config del agente (punto de partida)
 │       ├── lessons.template.md           ← inbox de correcciones
-│       ├── backlog.template.md           ← captura de ideas antes de ser tareas
 │       ├── dev-log.template.md           ← memoria episódica (lo que pasó esta semana)
+│       ├── feature-request.issue.md      ← template de Issue para perfiles no técnicos
+│       ├── backlog.template.md           ← captura de ideas antes de ser tareas
 │       ├── adr.template.md               ← Architecture Decision Record
 │       └── pdr.template.md               ← Preliminary Design Review
 │
@@ -156,6 +188,7 @@ ai-dev-protocol/
 └── docs/
     ├── inspirations.md                   ← en qué nos basamos y qué hacemos diferente
     ├── runtime-guide.md                  ← cómo ejecutar agentes 24/7 (VPS + FOSS)
+    ├── stakeholders.md                   ← guía para perfiles no técnicos
     └── litellm-config.yaml               ← proxy de API con budget — el freno de emergencia
 ```
 
@@ -173,6 +206,7 @@ ai-dev-protocol/
 | Correcciones a mitad de sesión perdidas | ⚠️ solo al cerrar | ❌ | ✅ captura con latencia cero |
 | Funciona con múltiples LLMs | ❌ | ❌ | ✅ adaptadores por modelo |
 | Adopción progresiva | ❌ | ❌ | ✅ empieza con 3 archivos |
+| Accesible a perfiles no técnicos | ❌ | ❌ | ✅ GitHub Issues + tablero visual |
 
 → Análisis completo de inspiraciones: [`docs/inspirations.md`](docs/inspirations.md)
 
