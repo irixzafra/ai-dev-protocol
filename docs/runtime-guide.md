@@ -308,6 +308,68 @@ docker compose up -d
 
 ---
 
+## El panel de control visual (gestión de tareas)
+
+> **No hay que programar ninguna UI.** El panel de administración oficial del protocolo es **GitHub Projects** — gratuito, integrado, sin infraestructura adicional.
+
+### Por qué GitHub Projects y no otra herramienta
+
+- Ya tienes el repo. Projects vive dentro de él.
+- Issues + Kanban + etiquetas + milestones: todo lo que necesitas para gestionar un sistema 24/7.
+- Los agentes pueden abrir, cerrar, comentar y mover issues via `gh` CLI o la API de GitHub — sin UI propia.
+
+### Flujo de trabajo: humano + agente autónomo
+
+```
+[Humano en el iPad]
+    → Crea un Issue en GitHub Projects: "Implementar validación en /api/users"
+    → Lo arrastra a la columna "Ready"
+
+[OpenHands en el VPS — ejecutándose solo]
+    → Lee Issues en estado "Ready" con: gh issue list --label auto
+    → Aplica ai-dev-protocol (Align → Execute → Verify → Reflect)
+    → Mueve el Issue a "In Progress": gh issue edit [id] --add-label in-progress
+    → Hace el commit y push
+    → Cierra el Issue: gh issue close [id] --comment "Done. Ver commit [hash]"
+
+[Humano vuelve]
+    → Ve la columna "Done" actualizada
+    → Revisa el commit en GitHub
+    → Aprueba o reabre el Issue con un comentario
+```
+
+### Setup en 5 minutos
+
+```bash
+# 1. Crear el tablero
+# GitHub → tu-repo → Projects → New Project → Board
+
+# 2. Columnas recomendadas:
+#    Backlog | Ready | In Progress | Review | Done
+
+# 3. Etiquetas para el agente autónomo
+gh label create "auto" --color "#0075ca" --description "Tarea apta para pickup autónomo"
+gh label create "in-progress" --color "#e4e669" --description "Reclamada por agente"
+gh label create "blocked" --color "#d93f0b" --description "Agente necesita intervención humana"
+
+# 4. El agente busca tareas con:
+gh issue list --label auto --state open --json number,title,body
+```
+
+### Integrar con el WORKBOARD.md local
+
+Los Issues de GitHub son el **origen de verdad para tareas nuevas**.
+`planning/WORKBOARD.md` es la **cola de trabajo activo** del agente en sesión.
+
+Flujo recomendado:
+- Issues etiquetados `auto` → el agente los copia a WORKBOARD como AUTO.* y los ejecuta
+- Issues etiquetados `feat` / `refactor` → requieren Phase 1 (alignment) antes de entrar a WORKBOARD
+- Decisiones de arquitectura → ADR en `specs/` + Issue cerrado con referencia
+
+**Resultado:** El iPad muestra el tablero Kanban. El VPS ejecuta. GitHub Projects es la UI que conecta a los dos.
+
+---
+
 ## Observabilidad opcional (FOSS)
 
 Si quieres un dashboard de trazas y evaluación de prompts:
