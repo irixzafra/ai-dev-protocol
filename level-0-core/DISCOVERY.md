@@ -132,4 +132,34 @@ If you want agents to load the playbook automatically without manual copy-paste:
 configure an MCP server that exposes `planning/project.playbook.md` as a resource.
 The agent reads it at session start without being told.
 
+---
+
+## Backlog analysis prompt
+
+Use this when an idea surfaces that isn't a task yet.
+Paste it into your agent with the idea appended at the end.
+
+```
+Read dev.protocol.md and planning/project.playbook.md before doing anything.
+Also read planning/BACKLOG.md if it exists.
+
+I have an idea I want to analyze before deciding whether to build it.
+Run a structured analysis. Ask me one question at a time:
+
+1. What problem does this idea solve? (Or what opportunity does it open?)
+2. Who benefits and how often does the problem occur?
+3. What are the risks or downsides of building this?
+4. Does it fit the current roadmap and constraints in the playbook?
+5. Are there simpler alternatives?
+
+After the dialogue, give me:
+- A MoSCoW priority (M/S/C/W) with your reasoning
+- A recommendation: accept (add to WORKBOARD), defer, or reject
+- If accepted: a one-paragraph spec I can paste into WORKBOARD
+
+Then update planning/BACKLOG.md with the analysis result.
+
+Idea: [describe it here]
+```
+
 This is optional. The manual approach (paste the file or reference it in your first message) works for 80% of use cases.
