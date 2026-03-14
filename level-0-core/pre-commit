@@ -1,0 +1,39 @@
+#!/bin/sh
+# Pre-commit hook — Level 0 (lite)
+# Checks: secrets + lessons graduation gate
+set -e
+
+STAGED=$(git diff --cached --name-only)
+
+# ── 1. Secrets gate ────────────────────────────────────────────────────────────
+# Block commits that add API keys, passwords, or tokens
+SECRETS=$(echo "$STAGED" | xargs git diff --cached --unified=0 -- 2>/dev/null \
+  | grep '^\+' \
+  | grep -iE '(api_key|apikey|api-key|secret|password|passwd|token|bearer|private_key)\s*[:=]\s*["\047][^"\047]{8,}' \
+  | grep -v '^\+\+\+' || true)
+
+if [ -n "$SECRETS" ]; then
+  echo "❌ BLOCKED: potential secret detected in staged diff"
+  echo "$SECRETS" | head -5
+  exit 1
+fi
+
+# ── 2. Lessons graduation gate ─────────────────────────────────────────────────
+# If LESSONS.md is staged, every new [pending] entry must have a graduation target staged too
+if echo "$STAGED" | grep -q "LESSONS.md"; then
+  BARE_PENDING=$(git diff --cached -- "*/LESSONS.md" "LESSONS.md" \
+    | grep '^\+' \
+    | grep '\[pending\]$' \
+    | grep -v '^\+\+\+' || true)
+
+  if [ -n "$BARE_PENDING" ]; then
+    echo "❌ BLOCKED: LESSONS.md has bare [pending] entries with no graduation target"
+    echo "  Each new lesson must have a graduation target staged alongside LESSONS.md."
+    echo "  Format: [pending → path/to/destination]"
+    echo ""
+    echo "$BARE_PENDING"
+    exit 1
+  fi
+fi
+
+exit 0
