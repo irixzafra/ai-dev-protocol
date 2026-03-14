@@ -87,6 +87,7 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e SANDBOX_RUNTIME_CONTAINER_IMAGE=docker.all-hands.dev/all-hands-ai/runtime:latest \
   -e LITELLM_BASE_URL=http://host.docker.internal:4000 \
+  -e WORKSPACE_BASE=/home/user/workspace/tu-proyecto \
   docker.all-hands.dev/all-hands-ai/openhands:latest
 ```
 
@@ -97,6 +98,49 @@ Acceso: `http://[tailscale-ip]:3000`
 2. Pegas la tarea: `"Lee dev.protocol.md y planning/WORKBOARD.md. Ejecuta la tarea AUTO.03."`
 3. Cierras el browser — el agente sigue
 4. Vuelves cuando quieras a ver el resultado
+
+### Inyección automática del protocolo (microagents)
+
+Sin esto, tienes que pegar las instrucciones del protocolo en cada sesión.
+Con esto, OpenHands las carga solo — sin que tú hagas nada.
+
+OpenHands lee `.openhands/microagents/repo.md` automáticamente al arrancar en un workspace.
+Ese archivo es el puente entre el motor de ejecución y tu protocolo.
+
+**En tu proyecto** (no en el repo del protocolo):
+
+```bash
+mkdir -p .openhands/microagents
+```
+
+Contenido de `.openhands/microagents/repo.md`:
+
+```markdown
+---
+name: repo
+type: repo
+agent: CodeActAgent
+---
+
+Before doing anything:
+
+1. Read `dev.protocol.md` — follow the flow exactly (Align → Execute → Verify → Reflect)
+2. Read `planning/project.playbook.md` — stack, paths, and patterns for this project
+3. Read the last 3 entries in `planning/dev-log.md` — recent session context
+4. Run: grep '\[pending\]$' planning/LESSONS.md — resolve before starting new work
+
+Then ask: "What should I work on?" or read `planning/WORKBOARD.md` for the next task.
+```
+
+Ahora cuando OpenHands arranca:
+1. Lee el microagent → sabe que debe cargar el protocolo
+2. Lee `dev.protocol.md` → sigue el flujo (Align → Execute → Verify → Reflect)
+3. Lee `dev-log.md` → conoce el estado de la última sesión
+4. Pide la siguiente tarea o la coge de WORKBOARD
+
+Sin pegar instrucciones. Sin configuración por sesión. El protocolo es automático.
+
+**Verificación:** Si al arrancar OpenHands dice algo como "He leído dev.protocol.md. Veo que AUTO.03 está libre — ¿lo reclamo?" → funciona. Si va directo a código sin leer nada → revisa la ruta en `WORKSPACE_BASE`.
 
 ### Aider — alternativa más ligera (sin UI web)
 
@@ -209,6 +253,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       LITELLM_BASE_URL: http://litellm:4000
+      WORKSPACE_BASE: /home/user/workspace/tu-proyecto  # ← ruta a tu repo
     depends_on:
       - litellm
     restart: unless-stopped
