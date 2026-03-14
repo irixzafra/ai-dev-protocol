@@ -1,191 +1,192 @@
 # AI Dev Protocol
 
-> Protocolo progresivo para desarrollo con IA.
-> Empieza simple. Escala cuando lo necesites.
-> Probado en producción con 4 agentes concurrentes en un SaaS real.
+**Un conjunto de reglas + templates que le dicen a tu agente de IA cómo trabajar en tu proyecto.**
+
+Sin código. Sin dependencias. Solo archivos Markdown que copias a tu repo y tu agente lee.
+Funciona con Claude Code, Codex, Gemini, Qwen, o cualquier LLM.
 
 ---
 
-## El problema que resuelve
+## El problema
 
 Si usas IA para programar, estos 3 fallos te son familiares:
 
-1. **La IA construye lo que no querías** — asumió en vez de preguntar.
-2. **Los mismos errores se repiten semana a semana** — cada sesión empieza desde cero.
-3. **Dice "terminado" pero no lo está** — sin verificación real.
+- **Construye lo que no querías** — asumió en vez de preguntar
+- **Repite los mismos errores** — cada sesión empieza desde cero
+- **Dice "terminado" y no lo está** — sin verificación real
 
-Estos 3 fallos se resuelven con solo 3 cosas mínimas:
-
-| ID | Regla | Fallo que previene |
-|---|---|---|
-| **R1** | Alineación — la IA escribe una spec, tú apruebas, luego codifica | La IA construye lo que no querías |
-| **R2** | Memoria — cada corrección se captura y llega donde se lee | Los mismos errores se repiten |
-| **R3** | Verificación — type-check + tests + secrets antes de "done" | Código roto llega al repo |
-
-Con R1+R2+R3 ya tienes un sistema mucho mejor que hablarle directamente a Claude/Grok/Gemini sin estructura. El resto de este protocolo son capas opcionales que añades cuando el proyecto lo exige.
+Los 3 se resuelven con 3 reglas mínimas, aplicadas de forma consistente.
 
 ---
 
-## Niveles progresivos
-
-### Nivel 0 — Básico
-
-> Para cualquier dev con 1 agente. Copia 3 archivos y empieza en 5 minutos.
-
-**Resuelve:** R1 + R2 + R3
-
-**Cuándo usarlo:** Tú solo, Claude Code (o cualquier agente) en tu portátil, un fix o un feature. Sin complejidad extra.
-
-**Qué incluye:**
-- `protocol.md` — el loop completo (alinear → ejecutar → verificar → reflexionar)
-- `lessons.template.md` — inbox de correcciones con modelo de graduación
-- `pre-commit` (lite) — bloquea secrets y fuerza que las lecciones lleguen a destino
-
-**→ [`level-0-core/`](level-0-core/)**
+## Empieza aquí — 5 minutos
 
 ```bash
-cp level-0-core/protocol.md your-project/dev.protocol.md
-cp level-0-core/templates/agent-config.template.md your-project/CLAUDE.md
-cp level-0-core/templates/lessons.template.md your-project/planning/LESSONS.md
+# Opción A: script automático
+bash <(curl -fsSL https://raw.githubusercontent.com/irixzafra/ai-dev-protocol/main/setup.sh)
+
+# Opción B: manual
+cp level-0-core/protocol.md        tu-proyecto/dev.protocol.md
+cp level-0-core/templates/agent-config.template.md  tu-proyecto/CLAUDE.md
+cp level-0-core/templates/lessons.template.md       tu-proyecto/planning/LESSONS.md
 ```
+
+Luego dile a tu agente:
+```
+Lee dev.protocol.md antes de hacer cualquier cosa.
+```
+
+Eso es todo para empezar.
 
 ---
 
-### Nivel 1 — Multi-agente
+## Cómo funciona
 
-> Cuando tienes ≥2 agentes en paralelo, o cambias de modelo (Claude → Grok → Qwen).
+Tres reglas que el agente sigue en cada tarea:
 
-**Añade:** R4 (coordinación) + R5 (portabilidad)
+| Regla | Qué hace | Fallo que previene |
+|---|---|---|
+| **R1 — Alinear** | Escribe una spec, tú la apruebas, luego codifica | Construye lo que no querías |
+| **R2 — Recordar** | Cada corrección se captura en un archivo que lee siempre | Los mismos errores se repiten |
+| **R3 — Verificar** | Type-check + tests + secrets antes de "done" | Código roto llega al repo |
 
-**Cuándo usarlo:** Varios agentes en el mismo repo, o quieres que el protocolo funcione igual con cualquier LLM sin reescribirlo para cada uno.
+Con R1+R2+R3 ya tienes un sistema estructurado. El resto del protocolo son capas opcionales.
 
-**Qué incluye:**
-- Entrevista de alineación estructurada (con sección de "no-goals" explícita)
-- Cola autónoma + mecanismo de claim (los agentes no se pisan)
-- Loop de auto-mejora con graduación obligada (el pre-commit lo fuerza)
-- Adaptadores por modelo: Claude Code, Codex/GPT-4o, Gemini, Qwen
+---
+
+## Niveles — empieza donde estás, escala cuando lo necesites
+
+### Nivel 0 — Un agente, cualquier proyecto
+
+**Para:** cualquier dev con 1 agente de IA. Fix rápido, feature nueva, proyecto personal.
+
+**Incluye:** `protocol.md` + `LESSONS.md` + `pre-commit` lite
+
+**Setup:** 5 minutos — [ver `level-0-core/`](level-0-core/)
+
+---
+
+### Nivel 1 — Varios agentes o varios modelos
+
+**Para:** 2+ agentes en paralelo, o cambias entre Claude/Grok/Qwen según la tarea.
+
+**Añade:**
+- Entrevista de alineación estructurada (con "non-goals" explícitos)
+- Cola de tareas con claim atómico (los agentes no se pisan)
+- Adaptadores por modelo: el protocolo funciona igual en cualquier LLM
 
 **→ [`level-1-multi-agent/`](level-1-multi-agent/)**
 
 ---
 
-### Nivel 2 — Producción y autonomía
+### Nivel 2 — Calidad y autonomía en producción
 
-> Para calidad UI seria y loops de optimización overnight sin supervisión.
+**Para:** UI generada por IA que no puede verse genérica, loops de optimización sin supervisión, proyectos serios con múltiples skills.
 
-**Añade:** R6 (calidad) + R7 (optimización)
-
-**Cuándo usarlo:** SaaS con CI/CD, UI generada por IA que no puede verse genérica, o quieres que la IA experimente sola mientras duermes.
-
-**Qué incluye:**
-- **Uncodixify:** 10 patrones de UI que los LLMs generan por defecto y que señalan "hecho por IA" — con causa raíz y alternativa correcta
-- **WORKBOARD** con cola autónoma (tareas pre-aprobadas que los agentes ejecutan sin supervisión)
-- **program.md** — loop de optimización autónomo (inspirado en karpathy/autoresearch): init → run → log → compare → iterate
+**Añade:**
+- Skills por dominio: backend, security, architecture, UI design
+- Playbook de proyecto (SSOT del stack y patrones específicos)
+- `program.md` — loop autónomo: init → run → log → compare → iterate
 
 **→ [`level-2-production/`](level-2-production/)**
 
 ---
 
-## Ejemplos reales de cuándo usar cada nivel
+## Cuándo usar cada nivel
 
 | Situación | Nivel |
 |---|---|
-| Tú solo, fix rápido en tu app personal | **Nivel 0** |
-| Feature nueva con Claude, quieres spec aprobada antes de código | **Nivel 0** |
-| 2-4 agentes en paralelo en el mismo repo | **Nivel 0 + 1** |
-| Cambias entre Claude y Qwen según la tarea | **Nivel 0 + 1** |
-| UI generada por IA que no puede verse genérica | **Nivel 0 + 1 + 2** |
-| Optimización autónoma overnight (RAG, bundle size, etc.) | **Nivel 0 + 1 + 2** |
+| Fix rápido en tu app personal con Claude | 0 |
+| Feature nueva — quieres spec aprobada antes de código | 0 |
+| 2+ agentes en el mismo repo sin que se pisen | 0 + 1 |
+| Cambias de modelo según la tarea | 0 + 1 |
+| UI generada que no puede parecer "genérica de IA" | 0 + 1 + 2 |
+| Optimización autónoma overnight (RAG, bundle, queries) | 0 + 1 + 2 |
 
 ---
 
-## Estructura de archivos
+## Estructura
 
 ```
 ai-dev-protocol/
-├── README.md
+├── setup.sh                              ← Level 0 en un comando
 │
-├── level-0-core/                    ← R1+R2+R3 — mínimo viable
-│   ├── protocol.md                  ← el loop completo
-│   │   ├── lessons.template.md          ← inbox de correcciones
-│   │   ├── agent-config.template.md     ← config de agente (punto de partida)
-│   └── pre-commit                   ← hook lite: secrets + graduación
+├── level-0-core/                         ← las 3 reglas mínimas
+│   ├── protocol.md                       ← el loop completo
+│   ├── pre-commit                        ← hook lite: secrets + graduación
+│   ├── discovery.md                      ← genera el playbook de tu proyecto
+│   └── templates/
+│       ├── agent-config.template.md      ← config del agente (punto de partida)
+│       ├── lessons.template.md           ← inbox de correcciones
+│       ├── backlog.template.md           ← captura de ideas antes de ser tareas
+│       ├── adr.template.md               ← Architecture Decision Record
+│       └── pdr.template.md               ← Preliminary Design Review
 │
-├── level-1-multi-agent/             ← R4+R5 — coordinación + portabilidad
-│   ├── alignment.md                 ← entrevista de alineación estructurada
-│   ├── autonomous.md                ← cola de tareas + mecanismo de claim
-│   ├── self-improvement.md          ← loop de auto-mejora + enforcement
+├── level-1-multi-agent/                  ← coordinación + portabilidad
+│   ├── alignment.md
+│   ├── autonomous.md
+│   ├── self-improvement.md
 │   └── adapters/
-│       ├── universal-core.md        ← 6 reglas base (todos los agentes)
-│       ├── claude.md                ← overrides Claude Code
-│       ├── codex.md                 ← overrides Codex/GPT-4o
-│       ├── gemini.md                ← overrides Gemini
-│       └── qwen.md                  ← overrides Qwen
+│       ├── universal-core.md             ← 6 reglas base, todos los agentes
+│       ├── claude.md
+│       ├── codex.md
+│       ├── gemini.md
+│       └── qwen.md
 │
-├── level-2-production/              ← R6+R7 — calidad + optimización
-│   ├── templates/workboard.template.md    ← tracking con cola autónoma
-│   ├── templates/program.template.md       ← loop de optimización autónomo
-│   └── skills/dev-design/references/
-│       └── uncodixify.md            ← 10 patrones de UI a eliminar
+├── level-2-production/                   ← calidad + autonomía
+│   ├── templates/
+│   │   ├── playbook.template.md          ← SSOT del proyecto
+│   │   ├── workboard.template.md         ← tracking con cola autónoma
+│   │   └── program.template.md           ← loop de optimización
+│   └── skills/
+│       ├── dev-design/uncodixify.md      ← 10 patrones UI de IA a eliminar
+│       ├── dev-backend/                  ← 10 anti-patterns backend
+│       ├── dev-security/                 ← OWASP Top 10 para agentes
+│       └── dev-architecture/             ← ADR/PDR + anti-patterns estructurales
+│
+├── examples/
+│   ├── saas-nextjs/                      ← playbook de ejemplo (Next.js + Supabase)
+│   └── protocol-evolution/               ← loop autónomo de descubrimiento de tendencias
 │
 └── docs/
-    └── inspirations.md              ← en qué nos inspiramos y qué hacemos diferente
+    └── inspirations.md                   ← en qué nos basamos y qué hacemos diferente
 ```
 
 ---
 
-## Qué hace diferente a este protocolo
+## Diferencias con otras aproximaciones
 
 | Problema | Boris Cherny (6 reglas) | karpathy | Este protocolo |
 |---|---|---|---|
 | La IA construye lo que no querías | ⚠️ plan mode | ❌ | ✅ entrevista de alineación estructurada |
-| Las lecciones desaparecen | ⚠️ actualizar CLAUDE.md | ❌ | ✅ sistema de graduación + pre-commit gate |
-| 4 agentes colisionando | ❌ | ❌ | ✅ mecanismo de claim |
-| UI genérica de LLM | ❌ | ❌ | ✅ Uncodixify como referencia de skill |
-| Loops de optimización autónoma | ❌ | ✅ | ✅ program.md (generalizado) |
-| Tareas pre-aprobadas sin supervisión | ❌ | ❌ | ✅ cola autónoma |
-| Correcciones mid-session perdidas | ⚠️ solo al cerrar sesión | ❌ | ✅ captura con latencia cero |
-| Funciona con múltiples LLMs | ❌ | ❌ | ✅ patrón de adaptadores |
-| Adopción progresiva | ❌ | ❌ | ✅ 3 niveles — empieza con 3 archivos |
+| Las lecciones desaparecen | ⚠️ actualizar CLAUDE.md | ❌ | ✅ sistema de graduación + gate en pre-commit |
+| 4 agentes colisionando | ❌ | ❌ | ✅ mecanismo de claim atómico |
+| UI genérica de LLM | ❌ | ❌ | ✅ Uncodixify (10 patrones con alternativas) |
+| Loops de optimización autónomos | ❌ | ✅ ML only | ✅ program.md (cualquier sistema) |
+| Correcciones a mitad de sesión perdidas | ⚠️ solo al cerrar | ❌ | ✅ captura con latencia cero |
+| Funciona con múltiples LLMs | ❌ | ❌ | ✅ adaptadores por modelo |
+| Adopción progresiva | ❌ | ❌ | ✅ empieza con 3 archivos |
 
-→ Análisis completo: [`docs/inspirations.md`](docs/inspirations.md)
-
----
-
-## Inspiraciones
-
-**Boris Cherny (@bcherny)** — ingeniero que construyó Claude Code en Anthropic.
-Sus 6 reglas son la base. Tomamos todas y añadimos:
-el sistema de graduación (las lecciones deben llegar donde se leen),
-la regla de corrección mid-session (captura con latencia cero), y
-coordinación multi-agente (4 agentes en un repo sin colisión).
-
-**karpathy/autoresearch** — el loop de investigación autónoma de Andrej Karpathy.
-`init → run → log → compare → iterate`. Lo generalizamos en el patrón
-`program.md` para cualquier loop de optimización, no solo ML research.
-
-**Uncodixify** — patrones de UI generados por IA identificados por la comunidad.
-Los formalizamos como referencia de skill con causas raíz y alternativas correctas.
-
-**chatgptjunkie** — circuló el "Workflow Orchestration" config (marzo 2026).
-La regla "Demand Elegance (Balanced)" viene de ahí.
+→ Análisis completo de inspiraciones: [`docs/inspirations.md`](docs/inspirations.md)
 
 ---
 
 ## Probado en producción
 
 - Monorepo Next.js 15 con TypeScript strict mode
-- 4 agentes de IA concurrentes: Claude Code, Codex, Gemini, Qwen
-- 1700+ tests, pre-commit con 9 quality gates
+- 4 agentes concurrentes: Claude Code, Codex, Gemini, Qwen
+- 1700+ tests, 9 quality gates en pre-commit
 - SaaS multi-tenant en beta
 
 ---
 
 ## Contribuir
 
-Cada patrón aquí fue extraído de uso real en producción.
-Si tienes una corrección, una skill nueva, o una mejora al protocolo:
-abre un PR. El issue es la spec. El PR es la implementación.
+Cada patrón aquí viene de uso real en producción.
+
+- **Nueva skill:** abre un issue con la plantilla "New skill suggestion"
+- **Mejora al protocolo:** issue con "Protocol improvement"
+- **El issue es la spec. El PR es la implementación.**
 
 ---
 
