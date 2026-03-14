@@ -209,6 +209,87 @@ gh label create "blocked"     --color "#d93f0b" # necesita intervención humana
 
 ---
 
+## Flujo híbrido — local + agente autónomo
+
+El escenario más común: trabajas localmente con tu IDE el 50% del tiempo, y dejas al agente trabajar en el servidor el otro 50% (noches, fines de semana, tareas paralelas).
+
+No hay magia. Es Git normal. El agente es un colaborador más.
+
+```
+Tú (local — IDE + Claude Code + terminal)
+         │
+         │ git push
+         ▼
+    GitHub (repo remoto)
+         │
+         │ git pull → trabaja → git push
+         ▼
+    Agente (VPS — GoClaw + dev.protocol.md)
+         │
+         │ notifica por Telegram con commit hash
+         ▼
+Tú haces git pull — ves el resultado
+```
+
+### Regla de coordinación
+
+| Situación | Qué pasa |
+|---|---|
+| Tú trabajas en algo | El agente no toca ese archivo ni rama |
+| Le mandas tarea al agente | Primero `git push` — el agente parte de lo último |
+| Ambos en paralelo | Ramas distintas — sin conflicto |
+
+### Lo que el agente necesita para hacer push
+
+Un **deploy key** SSH con permisos de escritura en el repo:
+
+```bash
+# 1. Generar la clave en el servidor
+ssh-keygen -t ed25519 -C "dev-runner@vps" -f /opt/dev-runner/deploy_key -N ''
+
+# 2. Ver la clave pública
+cat /opt/dev-runner/deploy_key.pub
+# → ssh-ed25519 AAAA... dev-runner@vps
+
+# 3. Añadirla en GitHub
+# Repo → Settings → Deploy keys → Add deploy key
+# ☑ Allow write access
+```
+
+```bash
+# 4. Configurar SSH para que use la clave con GitHub
+mkdir -p /opt/dev-runner/.ssh
+cat > /opt/dev-runner/.ssh/config << 'EOF'
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile /opt/dev-runner/deploy_key
+  StrictHostKeyChecking accept-new
+EOF
+```
+
+```bash
+# 5. Montar en el contenedor (docker-compose.override.yml)
+services:
+  goclaw:
+    volumes:
+      - ./deploy_key:/app/.ssh/id_ed25519:ro
+      - ./.ssh/config:/app/.ssh/config:ro
+    environment:
+      - GIT_SSH_COMMAND=ssh -i /app/.ssh/id_ed25519 -F /app/.ssh/config
+```
+
+### ¿Necesito correr el agente localmente?
+
+No. Tu herramienta local ya es Claude Code (u otro agente de terminal). El agente en el servidor es para trabajo autónomo cuando tú no estás. Duplicar el agente localmente no añade valor — añade complejidad.
+
+```
+Local  → Claude Code, IDE, terminal   (tú presente, control total)
+Remoto → GoClaw en VPS + Telegram     (tú ausente, 24/7 autónomo)
+```
+
+---
+
 ## Observabilidad opcional
 
 | Herramienta | Qué hace | Self-hosted |
