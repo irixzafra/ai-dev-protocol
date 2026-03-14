@@ -153,7 +153,9 @@ ai-dev-protocol/
 │   └── protocol-evolution/               ← loop autónomo de descubrimiento de tendencias
 │
 └── docs/
-    └── inspirations.md                   ← en qué nos basamos y qué hacemos diferente
+    ├── inspirations.md                   ← en qué nos basamos y qué hacemos diferente
+    ├── runtime-guide.md                  ← cómo ejecutar agentes 24/7 (VPS + FOSS)
+    └── litellm-config.yaml               ← proxy de API con budget — el freno de emergencia
 ```
 
 ---
@@ -172,6 +174,8 @@ ai-dev-protocol/
 | Adopción progresiva | ❌ | ❌ | ✅ empieza con 3 archivos |
 
 → Análisis completo de inspiraciones: [`docs/inspirations.md`](docs/inspirations.md)
+
+→ Cómo ejecutar agentes 24/7 con FOSS (VPS + OpenHands + LiteLLM): [`docs/runtime-guide.md`](docs/runtime-guide.md)
 
 ---
 

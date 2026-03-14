@@ -1,0 +1,34 @@
+# LiteLLM config — AI Dev Protocol runtime
+# Copy this to your VPS and edit with your API keys.
+# Full guide: docs/runtime-guide.md
+
+model_list:
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4-6
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-haiku
+    litellm_params:
+      model: anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: gemini-flash
+    litellm_params:
+      model: openrouter/google/gemini-2.5-flash
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: qwen-coder
+    litellm_params:
+      model: openrouter/qwen/qwen-2.5-coder-32b-instruct
+      api_key: os.environ/OPENROUTER_API_KEY
+
+litellm_settings:
+  budget_manager: True
+  drop_params: True       # ignore unknown params instead of erroring
+
+general_settings:
+  max_budget: 5           # $5 USD maximum
+  budget_duration: 1d     # resets every 24 hours
+  # Increase or decrease based on your usage pattern.
+  # At $5/day: ~1.6M Claude Haiku tokens, or ~330K Claude Sonnet tokens.
