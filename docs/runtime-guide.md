@@ -1,150 +1,84 @@
-# Runtime Guide — Cómo ejecutar el protocolo 24/7
+# Motores de Ejecución — Runtime Guide
 
-> **Filosofía:** Soberanía tecnológica y pragmatismo.
-> Solo pagas el VPS y el consumo de API. Todo el tooling es FOSS.
-> El agente trabaja mientras duermes. Tú mandas desde el iPad.
-
----
-
-## Arquitectura en una línea
-
-```
-Tu dispositivo (iPad / móvil / portátil)
-    ↓  Tailscale VPN (acceso privado, sin puertos abiertos)
-VPS Linux
-    ├── code-server        → VS Code en el browser
-    ├── OpenHands          → agente ejecutor FOSS con UI web
-    └── LiteLLM            → proxy de API + budget + logs
-            ↓
-    OpenRouter / Anthropic / OpenAI  (pagas solo lo que usas)
-```
+> El protocolo es el cerebro. Tú eliges el músculo según tu necesidad.
+> La clave: inyectar siempre `dev.protocol.md` (y el playbook) como prompt de sistema base.
+> Sin eso, tienes un agente genérico. Con eso, tienes un sistema autónomo.
 
 ---
 
-## Capa 1 — Infraestructura (el servidor)
+## Matriz de decisión
 
-### VPS recomendado
+| Escenario | Motor recomendado | Por qué | Contra |
+|:---|:---|:---|:---|
+| Equipos técnicos, refactors grandes, código legacy | **OpenHands** | Sandbox Docker, seguro, UI web completa | Pesado — necesita servidor con más RAM |
+| Solopreneur, control móvil, VPS barato (4-8€/mes) | **Agente Go ligero** (ej. GoClaw) | Binario único, Telegram/WhatsApp nativo, RAM ínfima | Sandbox menos estricto |
+| Solo terminal, sin UI | **Aider** | `pip install`, ligero, ideal para sesiones cortas | Sin UI, sin control remoto |
 
-| Proveedor | Tier mínimo | Coste |
-|---|---|---|
-| Hetzner CX22 | 2 vCPU, 4GB RAM, 40GB SSD | ~4€/mes |
-| DigitalOcean Basic | 2 vCPU, 2GB RAM | ~12$/mes |
-| Cualquier VPS Linux | Ubuntu 22.04+ | — |
-
-4GB RAM es suficiente para code-server + OpenHands + LiteLLM corriendo juntos.
-
-### Tailscale — acceso privado desde cualquier dispositivo
-
-Tailscale crea una red privada entre tus dispositivos. No abres puertos al mundo. Accedes al servidor como si fuera local.
-
-```bash
-# En el VPS:
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up
-
-# En tu iPad / móvil:
-# Instala la app Tailscale → misma cuenta → el VPS aparece en tu red privada
-```
-
-> **Alternativa 100% self-hosted:** [Headscale](https://github.com/juanfont/headscale) es el control server de Tailscale en FOSS que puedes alojar tú mismo.
-
-### Docker — aislamiento y reproducibilidad
-
-```bash
-# Ubuntu
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-```
+Elige uno. Inyecta el protocolo. Funciona con cualquier LLM via LiteLLM.
 
 ---
 
-## Capa 2 — El entorno y el agente (el "músculo")
+## 1. OpenHands — El obrero de fábrica
 
-### code-server — VS Code en el browser
+Para tareas pesadas donde la IA necesita ejecutar código en un entorno aislado sin tocar tu máquina real.
 
-```bash
-docker run -d \
-  --name code-server \
-  -p 127.0.0.1:8080:8080 \
-  -v "$HOME/.config:/home/coder/.config" \
-  -v "$PWD:/home/coder/project" \
-  -e PASSWORD="tu_password_aqui" \
-  codercom/code-server:latest
-```
+**Qué es:** [OpenHands](https://github.com/All-Hands-AI/OpenHands) (antes OpenDevin) — agente FOSS con UI web y sandbox Docker para cada tarea.
 
-Acceso: `http://[tailscale-ip-del-vps]:8080`
+**Beneficios:** Dockerizado, seguro, soporte multi-modelo, UI web accesible desde el iPad.
 
-Desde la terminal de code-server clonas el repo, editas el playbook, lanzas al agente, y puedes cerrar el browser — el proceso sigue corriendo en el servidor.
-
-### OpenHands — agente ejecutor FOSS
-
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) (antes OpenDevin) es el ejecutor de agentes más completo en FOSS. Tiene UI web, sandbox Docker para cada tarea, y soporte nativo para múltiples modelos.
+**Cómo inyectar el protocolo:**
 
 ```bash
-docker run -d \
-  --name openhands \
-  -p 127.0.0.1:3000:3000 \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -e SANDBOX_RUNTIME_CONTAINER_IMAGE=docker.all-hands.dev/all-hands-ai/runtime:latest \
+# Concepto general — adapta a tu setup
+docker run -it \
+  -v $(pwd):/workspace \
   -e LITELLM_BASE_URL=http://host.docker.internal:4000 \
-  -e WORKSPACE_BASE=/home/user/workspace/tu-proyecto \
+  -e WORKSPACE_BASE=/workspace \
   docker.all-hands.dev/all-hands-ai/openhands:latest
 ```
 
-Acceso: `http://[tailscale-ip]:3000`
+En el workspace, coloca `.openhands/microagents/repo.md` (ver `setup.sh` — lo crea automáticamente).
+OpenHands lo lee al arrancar y carga el protocolo sin que pegues nada manualmente.
 
 **Flujo de trabajo:**
-1. Abres OpenHands desde el iPad
-2. Pegas la tarea: `"Lee dev.protocol.md y planning/WORKBOARD.md. Ejecuta la tarea AUTO.03."`
-3. Cierras el browser — el agente sigue
-4. Vuelves cuando quieras a ver el resultado
+1. Abres OpenHands desde el navegador
+2. Pegas la tarea o la lees de `planning/WORKBOARD.md`
+3. Cierras el navegador — el agente sigue
+4. Vuelves a ver el resultado
 
-### Inyección automática del protocolo (microagents)
+---
 
-Sin esto, tienes que pegar las instrucciones del protocolo en cada sesión.
-Con esto, OpenHands las carga solo — sin que tú hagas nada.
+## 2. Agente Go ligero — El CTO de bolsillo
 
-OpenHands lee `.openhands/microagents/repo.md` automáticamente al arrancar en un workspace.
-Ese archivo es el puente entre el motor de ejecución y tu protocolo.
+Para gestionar el proyecto desde el móvil. Un agente ligero escrito en Go: binario único, sin dependencias, Telegram/WhatsApp nativo, consume 4-8x menos RAM que las alternativas en Python.
 
-**En tu proyecto** (no en el repo del protocolo):
+**Por qué Go:** Compila a un solo ejecutable estático (~25 MB). Lo copias al VPS, lo arrancas, y ya está. No hay pip, no hay venv, no hay Docker si no quieres.
+
+**Cómo inyectar el protocolo:**
 
 ```bash
-mkdir -p .openhands/microagents
+# Concepto general — adapta a tu agente Go
+./agente \
+  --protocol-file=dev.protocol.md \
+  --playbook=planning/project.playbook.md \
+  --telegram-token=TU_TOKEN \
+  --task="Inicia Phase 1 y avísame por Telegram si hay un BLOCKER"
 ```
 
-Contenido de `.openhands/microagents/repo.md`:
+**Flujo de trabajo:**
+1. El agente corre en el VPS 24/7
+2. Tú mandas tareas desde Telegram/WhatsApp mientras duermes o estás de viaje
+3. El agente ejecuta el loop del protocolo (Align → Execute → Verify → Reflect)
+4. Si se bloquea, te manda el `BLOCKER.md` por chat
+5. Tú respondes con la decisión — el agente retoma
 
-```markdown
+**Nota:** Si tienes tu propio sistema de agentes en Go, inyecta `dev.protocol.md` como system prompt y sigue el mismo patrón.
+
 ---
-name: repo
-type: repo
-agent: CodeActAgent
----
 
-Before doing anything:
+## 3. Aider — La navaja suiza de terminal
 
-1. Read `dev.protocol.md` — follow the flow exactly (Align → Execute → Verify → Reflect)
-2. Read `planning/project.playbook.md` — stack, paths, and patterns for this project
-3. Read the last 3 entries in `planning/dev-log.md` — recent session context
-4. Run: grep '\[pending\]$' planning/LESSONS.md — resolve before starting new work
-
-Then ask: "What should I work on?" or read `planning/WORKBOARD.md` for the next task.
-```
-
-Ahora cuando OpenHands arranca:
-1. Lee el microagent → sabe que debe cargar el protocolo
-2. Lee `dev.protocol.md` → sigue el flujo (Align → Execute → Verify → Reflect)
-3. Lee `dev-log.md` → conoce el estado de la última sesión
-4. Pide la siguiente tarea o la coge de WORKBOARD
-
-Sin pegar instrucciones. Sin configuración por sesión. El protocolo es automático.
-
-**Verificación:** Si al arrancar OpenHands dice algo como "He leído dev.protocol.md. Veo que AUTO.03 está libre — ¿lo reclamo?" → funciona. Si va directo a código sin leer nada → revisa la ruta en `WORKSPACE_BASE`.
-
-### Aider — alternativa más ligera (sin UI web)
-
-Si prefieres un agente de terminal sin UI:
+Para sesiones cortas sin UI. Sin Docker, sin servidor, solo una terminal.
 
 ```bash
 pip install aider-chat
@@ -153,17 +87,17 @@ aider --model openrouter/anthropic/claude-sonnet-4-6 \
       --read planning/project.playbook.md
 ```
 
-Más ligero que OpenHands. Ideal si ya tienes code-server y solo quieres un agente en terminal.
+Más ligero que OpenHands. Ideal si ya tienes un entorno local y solo quieres un agente en terminal para una tarea concreta.
 
 ---
 
-## Capa 3 — El freno de emergencia (control de costes)
+## 4. El freno de emergencia — Obligatorio para 24/7
 
-> **El problema:** Un agente autónomo que entra en un bucle a las 4AM puede quemar todo tu presupuesto antes del desayuno.
->
-> **Dos líneas de defensa:**
-> 1. **Rollback rule** (en `protocol.md`): si la verificación falla 3 veces seguidas, el agente hace reset al último commit limpio. Primera línea, en el propio protocolo.
-> 2. **LiteLLM budget**: si el agente ignora la rollback rule o el bucle no es de verificación, LiteLLM corta la conexión al llegar al límite diario. Salvavidas final.
+> Un agente autónomo que entra en bucle a las 4AM puede quemar todo tu presupuesto antes del desayuno.
+
+**Dos líneas de defensa:**
+1. **Rollback rule** (en `protocol.md`): si la verificación falla 3 veces seguidas, el agente hace `git stash` y vuelve a Phase 1. Primera línea — en el propio protocolo.
+2. **LiteLLM budget**: si el agente ignora la rollback rule, LiteLLM corta la conexión al llegar al límite diario. Salvavidas final.
 
 ### NUNCA le des la API key directamente al agente
 
@@ -172,11 +106,9 @@ Más ligero que OpenHands. Ideal si ya tienes code-server y solo quieres un agen
 ✅  ANTHROPIC_API_KEY=sk-ant-... → LiteLLM → agente usa http://localhost:4000
 ```
 
-El agente solo ve la URL del proxy. No puede hacer llamadas directas.
+### LiteLLM — proxy con budget diario
 
-### LiteLLM — proxy FOSS con budget
-
-```bash
+```yaml
 # litellm-config.yaml
 model_list:
   - model_name: claude-sonnet
@@ -184,18 +116,10 @@ model_list:
       model: anthropic/claude-sonnet-4-6
       api_key: os.environ/ANTHROPIC_API_KEY
 
-  - model_name: claude-haiku
-    litellm_params:
-      model: anthropic/claude-haiku-4-5-20251001
-      api_key: os.environ/ANTHROPIC_API_KEY
-
-  - model_name: openrouter-gemini
+  - model_name: gemini-flash
     litellm_params:
       model: openrouter/google/gemini-2.5-flash
       api_key: os.environ/OPENROUTER_API_KEY
-
-litellm_settings:
-  budget_manager: True
 
 general_settings:
   max_budget: 5        # $5 máximo total
@@ -208,178 +132,84 @@ docker run -d \
   -p 127.0.0.1:4000:4000 \
   -v $(pwd)/litellm-config.yaml:/app/config.yaml \
   -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-  -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY \
   ghcr.io/berriai/litellm:main \
-  --config /app/config.yaml --detailed_debug
+  --config /app/config.yaml
 ```
-
-Dashboard de logs: `http://[tailscale-ip]:4000/ui`
 
 Al llegar a $5/día → LiteLLM devuelve 429. El agente para. Tú revisas qué pasó.
 
 ---
 
-## Docker Compose completo
+## Infraestructura base (VPS + acceso privado)
 
-```yaml
-# docker-compose.yml
-services:
-  litellm:
-    image: ghcr.io/berriai/litellm:main
-    ports:
-      - "127.0.0.1:4000:4000"
-    volumes:
-      - ./litellm-config.yaml:/app/config.yaml
-    env_file: .env
-    command: --config /app/config.yaml
-    restart: unless-stopped
+### VPS recomendado
 
-  code-server:
-    image: codercom/code-server:latest
-    ports:
-      - "127.0.0.1:8080:8080"
-    volumes:
-      - ./workspace:/home/coder/project
-      - coder-config:/home/coder/.config
-    environment:
-      PASSWORD: ${CODE_SERVER_PASSWORD}
-    restart: unless-stopped
+| Proveedor | Tier mínimo | Coste |
+|---|---|---|
+| Hetzner CX22 | 2 vCPU, 4GB RAM | ~4€/mes |
+| DigitalOcean Basic | 2 vCPU, 2GB RAM | ~12$/mes |
 
-  openhands:
-    image: docker.all-hands.dev/all-hands-ai/openhands:latest
-    ports:
-      - "127.0.0.1:3000:3000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      LITELLM_BASE_URL: http://litellm:4000
-      WORKSPACE_BASE: /home/user/workspace/tu-proyecto  # ← ruta a tu repo
-    depends_on:
-      - litellm
-    restart: unless-stopped
+Para el agente Go ligero, 2GB RAM es más que suficiente. Para OpenHands, usa 4GB+.
 
-volumes:
-  coder-config:
-```
+### Acceso privado desde móvil — Tailscale
 
 ```bash
-# .env (nunca en git)
-ANTHROPIC_API_KEY=sk-ant-...
-OPENROUTER_API_KEY=sk-or-...
-CODE_SERVER_PASSWORD=elige_una_clave
-
-# Arrancar todo:
-docker compose up -d
-```
-
----
-
-## Setup en 15 minutos
-
-```bash
-# 1. VPS nuevo con Ubuntu 22.04
-ssh root@tu-vps-ip
-
-# 2. Tailscale
+# En el VPS:
 curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up
 
-# 3. Docker
-curl -fsSL https://get.docker.com | sh && sudo usermod -aG docker $USER
-newgrp docker
-
-# 4. Clonar el protocolo y tu proyecto
-mkdir -p ~/workspace
-git clone https://github.com/irixzafra/ai-dev-protocol ~/ai-dev-protocol
-git clone https://github.com/tu-usuario/tu-proyecto ~/workspace/tu-proyecto
-
-# 5. Copiar archivos Level 0 al proyecto
-bash ~/ai-dev-protocol/setup.sh ~/workspace/tu-proyecto
-
-# 6. Configurar LiteLLM y arrancar
-cp ~/ai-dev-protocol/docs/litellm-config.yaml ~/litellm-config.yaml
-# Editar: añadir tus API keys en .env
-docker compose up -d
-
-# 7. Desde el iPad:
-# http://[tailscale-ip]:8080  → code-server (VS Code)
-# http://[tailscale-ip]:3000  → OpenHands (agente)
-# http://[tailscale-ip]:4000/ui → LiteLLM (logs y gasto)
+# En tu móvil: instala la app → misma cuenta → el VPS aparece en tu red privada
 ```
+
+Accedes al VPS como si fuera local. Sin puertos abiertos al mundo.
 
 ---
 
-## El panel de control visual (gestión de tareas)
+## El panel de control visual — GitHub Projects
 
-> **No hay que programar ninguna UI.** El panel de administración oficial del protocolo es **GitHub Projects** — gratuito, integrado, sin infraestructura adicional.
-
-### Por qué GitHub Projects y no otra herramienta
-
-- Ya tienes el repo. Projects vive dentro de él.
-- Issues + Kanban + etiquetas + milestones: todo lo que necesitas para gestionar un sistema 24/7.
-- Los agentes pueden abrir, cerrar, comentar y mover issues via `gh` CLI o la API de GitHub — sin UI propia.
-
-### Flujo de trabajo: humano + agente autónomo
+No necesitas una UI propia. El tablero de administración del protocolo es **GitHub Projects** — gratuito e integrado.
 
 ```
-[Humano en el iPad]
-    → Crea un Issue en GitHub Projects: "Implementar validación en /api/users"
-    → Lo arrastra a la columna "Ready"
+[Tú — desde el móvil]
+   → Creas un Issue: "Añadir validación en /api/users"
+   → Lo mueves a "Ready"
 
-[OpenHands en el VPS — ejecutándose solo]
-    → Lee Issues en estado "Ready" con: gh issue list --label auto
-    → Aplica ai-dev-protocol (Align → Execute → Verify → Reflect)
-    → Mueve el Issue a "In Progress": gh issue edit [id] --add-label in-progress
-    → Hace el commit y push
-    → Cierra el Issue: gh issue close [id] --comment "Done. Ver commit [hash]"
-
-[Humano vuelve]
-    → Ve la columna "Done" actualizada
-    → Revisa el commit en GitHub
-    → Aprueba o reabre el Issue con un comentario
+[Agente — en el VPS]
+   → Lee Issues con etiqueta `auto`
+   → Aplica el protocolo (Align → Execute → Verify → Reflect)
+   → Mueve la tarjeta a "Done"
+   → Cierra el Issue con referencia al commit
 ```
-
-### Setup en 5 minutos
 
 ```bash
-# 1. Crear el tablero
-# GitHub → tu-repo → Projects → New Project → Board
-
-# 2. Columnas recomendadas:
-#    Backlog | Ready | In Progress | Review | Done
-
-# 3. Etiquetas para el agente autónomo
-gh label create "auto" --color "#0075ca" --description "Tarea apta para pickup autónomo"
-gh label create "in-progress" --color "#e4e669" --description "Reclamada por agente"
-gh label create "blocked" --color "#d93f0b" --description "Agente necesita intervención humana"
-
-# 4. El agente busca tareas con:
-gh issue list --label auto --state open --json number,title,body
+# Etiquetas mínimas
+gh label create "auto"       --color "#0075ca"  # tarea autónoma
+gh label create "in-progress" --color "#e4e669" # reclamada por agente
+gh label create "blocked"     --color "#d93f0b" # necesita intervención humana
 ```
-
-### Integrar con el WORKBOARD.md local
-
-Los Issues de GitHub son el **origen de verdad para tareas nuevas**.
-`planning/WORKBOARD.md` es la **cola de trabajo activo** del agente en sesión.
-
-Flujo recomendado:
-- Issues etiquetados `auto` → el agente los copia a WORKBOARD como AUTO.* y los ejecuta
-- Issues etiquetados `feat` / `refactor` → requieren Phase 1 (alignment) antes de entrar a WORKBOARD
-- Decisiones de arquitectura → ADR en `specs/` + Issue cerrado con referencia
-
-**Resultado:** El iPad muestra el tablero Kanban. El VPS ejecuta. GitHub Projects es la UI que conecta a los dos.
 
 ---
 
-## Observabilidad opcional (FOSS)
-
-Si quieres un dashboard de trazas y evaluación de prompts:
+## Observabilidad opcional
 
 | Herramienta | Qué hace | Self-hosted |
 |---|---|---|
-| [Langfuse](https://github.com/langfuse/langfuse) | Trazas, costs, evaluación de prompts | ✅ Docker |
+| [Langfuse](https://github.com/langfuse/langfuse) | Trazas, costes, evaluación de prompts | ✅ Docker |
 | [Phoenix (Arize)](https://github.com/Arize-ai/phoenix) | Observabilidad de agentes, spans | ✅ pip install |
 
-LiteLLM ya integra con ambos via callbacks. Para la mayoría de casos el dashboard de LiteLLM es suficiente.
+LiteLLM integra con ambos via callbacks. Para la mayoría de casos el dashboard de LiteLLM es suficiente.
+
+---
+
+## ¿Usas otro motor?
+
+Aider, Cline, Cursor, tu propio agente — el principio es el mismo:
+
+1. Inyecta `dev.protocol.md` como system prompt o contexto inicial
+2. Inyecta `planning/project.playbook.md` si existe
+3. El agente lee las últimas 3 entradas de `planning/dev-log.md` al arrancar
+4. Sigue el loop: Align → Execute → Verify → Reflect
+
+**Contribuye una guía** para tu motor vía PR — ver `CONTRIBUTING.md`.
 
 ---
 
@@ -388,9 +218,6 @@ LiteLLM ya integra con ambos via callbacks. Para la mayoría de casos el dashboa
 | Concepto | Coste |
 |---|---|
 | VPS Hetzner CX22 | ~4€/mes |
-| LiteLLM, code-server, OpenHands | 0€ (FOSS) |
-| Tailscale (personal) | 0€ |
-| API (Claude Sonnet) | ~$0.003 por 1K tokens — budget propio |
+| LiteLLM, OpenHands, Tailscale | 0€ (FOSS) |
+| API (Claude Sonnet) | ~$0.003/1K tokens — budget propio |
 | **Total infra** | **~4€/mes + lo que uses de API** |
-
-El budget de LiteLLM garantiza que el "lo que uses de API" nunca supere tu límite diario.
