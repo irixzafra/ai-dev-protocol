@@ -32,6 +32,11 @@ echo "✓ planning/MEMORY.md"
 curl -fsSL "$REPO/level-0-core/templates/dev-log.template.md" -o "$TARGET/planning/dev-log.md"
 echo "✓ planning/dev-log.md"
 
+# GitHub Issue Template for non-technical feature requests
+mkdir -p "$TARGET/.github/ISSUE_TEMPLATE"
+curl -fsSL "$REPO/level-0-core/templates/feature-request.issue.md" -o "$TARGET/.github/ISSUE_TEMPLATE/feature-request.md"
+echo "✓ .github/ISSUE_TEMPLATE/feature-request.md (non-technical feature requests)"
+
 # OpenHands microagent (auto-loads protocol when using OpenHands)
 mkdir -p "$TARGET/.openhands/microagents"
 cat > "$TARGET/.openhands/microagents/repo.md" <<'EOF'

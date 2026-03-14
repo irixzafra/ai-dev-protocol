@@ -61,6 +61,16 @@ This file only contains what is specific to this agent.
 
 ---
 
+## Stakeholder Communication
+
+<!-- If non-technical stakeholders (PMs, clients) use GitHub Issues or GitHub Pages: -->
+- After completing a major milestone: update `docs/stakeholders.md` in plain language
+  (what was built, what impact it has — no technical jargon)
+- Feature requests from non-technical users come via GitHub Issues with label `review`
+  Run Phase 1 — Alignment on those issues before writing any code
+
+---
+
 ## Agent-Specific Notes
 
 <!-- Anything specific to this agent that isn't in the protocol -->
