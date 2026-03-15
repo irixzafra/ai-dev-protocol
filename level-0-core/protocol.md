@@ -56,6 +56,37 @@ Zero-latency capture prevents lessons from evaporating before session end.
 
 The agent enters Plan Mode **proactively** — the human does not need to ask.
 
+#### Phase 1-α. Secrets sanity check (runs before anything else)
+
+Before exploring or classifying, scan the task description for:
+- API keys (`sk_*`, `pk_*`, `*_secret`, bearer tokens)
+- Passwords or credentials
+- Private encryption keys or certificates
+- OAuth tokens or refresh tokens
+- Database passwords
+
+**If any secret is found in the task description, STOP immediately:**
+
+```
+⚠️ BLOCKED — SECRET IN PROMPT
+
+The task description contains what appears to be a live secret.
+I will not repeat, use, or reference this value anywhere.
+
+What you must do:
+1. Revoke this secret immediately if it's live
+2. Re-submit the task WITHOUT the secret value
+3. The secret should live in your .env or vault — never in a chat message
+
+I'm ready when you resubmit without the secret.
+```
+
+Do not continue to Phase 1a until the task is resubmitted without secrets.
+
+**If no secrets found:** proceed to 1a.
+
+---
+
 #### 1a. Classify the category
 
 Before reading any code, classify the task into one primary category:
@@ -81,16 +112,65 @@ If the task spans multiple categories, pick the dominant one. If unclear, ask �
 
 If exploration reveals the task is a higher scope class than it appeared, say so before writing the plan.
 
-#### 1c. Explore, interview, plan
+#### 1c. Explore and interview
 
 1. **Explore**: read the category-relevant context (see 1a), then read the code
 2. **Interview**: ask only questions that require human judgment (max 4-5, category-appropriate)
-3. **Write the plan** with:
-   - What will be built
-   - What will NOT be built (explicit scope boundary)
-   - Files likely affected
-   - Acceptance criteria — verifiable, not vague
-4. **Human approves → work starts. No approval → no code.**
+3. **STOP HERE** — wait for the human to answer before writing anything else
+
+Silence after the interview = the agent is blocked. Do not proceed to 1d without answers.
+
+#### 1d. Breaking change gate
+
+If scope (1b) is **Breaking**, evaluate before writing the plan:
+
+**Escalate immediately (do NOT write a plan yet) if the task has ANY of:**
+- Infrastructure decision not yet made (new DB engine, new auth provider, etc.)
+- Irreversible data transformation without migration strategy
+- External contract change with no rollout plan
+- Deadline <1 week for a systemic change
+- Removes or replaces a major service (Supabase, Auth0, etc.)
+
+**If escalation is required:**
+
+```markdown
+# BLOCKER — [task-id]
+
+**Task:** [description]
+**Why I cannot proceed:** [e.g., "MySQL migration requires architectural re-decision — Supabase RLS has no direct equivalent"]
+
+**What I discovered:**
+- [finding 1]
+- [finding 2]
+
+**Decisions required before I write a plan:**
+1. [Decision — context why it's blocking]
+2. [Decision — context why it's blocking]
+
+Once you decide, I'll write the plan. Until then: blocked.
+```
+
+Push branch `ai-blocked/[task-id]` with BLOCKER.md committed. Stop.
+
+**If no escalation criteria apply:** write the plan normally.
+
+#### 1e. Write and present the plan
+
+After the interview is answered (and breaking gate passed), write the plan using the Spec Format below.
+
+Present it explicitly:
+
+```
+# PLAN — [task-id]
+
+[full plan content]
+
+---
+**AWAITING APPROVAL** — I will not write any code until you approve this plan.
+Reply with "approved" or request changes.
+```
+
+**Rule:** Silence after the plan = the agent is blocked. No approval = no code.
 
 ---
 
