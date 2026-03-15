@@ -52,9 +52,14 @@ Zero-latency capture prevents lessons from evaporating before session end.
 
 ## The Flow — Align → Execute → Verify → Reflect
 
-### Phase 1 — Alignment (required for any non-trivial task)
+### Phase 1 — Alignment
 
-The agent enters Plan Mode **proactively** — the human does not need to ask.
+Phase 1 applies to all tasks. For **Isolated** scope, it's abbreviated:
+- Skip 1c (interview) — no questions needed for obvious single-file fixes
+- Skip 1d (breaking gate) — not applicable
+- 1e produces a 1-sentence plan (self-approved): "Fix: [what + where]. Commit as `fix(scope): description`."
+
+For Surface, Systemic, or Breaking scope: full Phase 1 mandatory. The agent enters Plan Mode **proactively** — the human does not need to ask.
 
 #### Phase 1-α. Secrets sanity check (runs before anything else)
 
@@ -192,7 +197,12 @@ If Phase 1 leaves a genuine uncertainty between two approaches that cannot be re
 4. Compare outcomes (type errors, test failures, code size, clarity)
 5. Delete the losing branch. PR the winner with a one-line rationale: "Chose A over B because [concrete reason]."
 
-Use shadow branches only when the approaches are functionally different. Never for style preferences.
+Use shadow branches when the approaches are functionally different AND the human cannot decide upfront (signal: they explicitly say "not sure which" or "which should we use?").
+
+**When to propose shadow branching in the plan:**
+If the task description contains explicit uncertainty ("not sure which", "which should we use?", "A or B?"), the plan MUST propose shadow branching as the implementation strategy — not a simple recommendation.
+
+Never use shadow branches for style preferences or when requirements clearly indicate one approach.
 
 ---
 
@@ -269,6 +279,8 @@ Types: feat, fix, refactor, chore, docs, test, perf
 # [task-id] — [short title]
 
 **Status:** draft | approved | in-progress | done
+**Scope:** Isolated | Surface | Systemic | Breaking
+**Commit type:** fix | feat | refactor | chore | docs | perf
 **Date:** YYYY-MM-DD
 
 ## Intent
