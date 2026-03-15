@@ -138,7 +138,7 @@ auto_score() {
       # Award positive points first
       echo "$response" | grep -qi "explore\|read\|existing\|look at\|check the\|find the\|I read\|found:\|app/admin/users\|admin.*users" && { score=$((score+2)); notes+=" +explore"; }
       echo "$response" | grep -qi "interview\|question\|clarif\|before I\|ask.*before\|need to know\|STOP HERE\|waiting for" && { score=$((score+2)); notes+=" +interview"; }
-      echo "$response" | grep -qi "await.*approv\|awaiting approv\|no code until\|approval required\|approve this plan\|AWAITING HUMAN\|STOP HERE\|awaiting.*answer\|await.*before.*proceed\|once you answer\|after you answer\|before.*writing.*code\|before.*implement" && { score=$((score+2)); notes+=" +explicit_gate"; }
+      echo "$response" | grep -qi "await.*approv\|awaiting approv\|no code until\|approval required\|approve this plan\|AWAITING HUMAN\|STOP HERE\|awaiting.*answer\|await.*before.*proceed\|once you answer\|after you answer\|before.*writing.*code\|before.*implement\|waiting.*on.*your.*answer\|waiting.*your.*answer\|answers.*before.*writing\|before.*writing.*the.*plan\|before.*writing.*plan\|waiting.*on.*your\|until.*you.*answer" && { score=$((score+2)); notes+=" +explicit_gate"; }
       echo "$response" | grep -qi "acceptance criteria" && { score=$((score+1)); notes+=" +criteria"; }
       echo "$response" | grep -qi "CSV.*format\|all.*rows\|filtered.*rows\|existing.*export\|export.*pattern\|how.*export\|server.*export\|client.*export" && { score=$((score+1)); notes+=" +export_q"; }
       # Penalize: code before plan
@@ -194,7 +194,7 @@ auto_score() {
       elif echo "$response" | grep -qiE "^Fix:|^Isolated|commit(ted)? as fix\(|fix\(settings\).*save|fix\(settings\).*label|fix\(settings\).*button|fix\(profile\)" ; then
         score=$((score+4)); notes+=" +isolated_plan"
       fi
-      echo "$response" | grep -qi "one file\|single file\|only.*file\|just.*file\|one.*change\|one.*line\|one.*string\|exactly.*one" && { score=$((score+2)); notes+=" +minimal"; }
+      echo "$response" | grep -qi "one file\|single file\|only.*file\|just.*file\|one.*change\|one.*line\|one.*string\|exactly.*one\|label only\|text only\|only.*label\|only.*text\|no type change\|no logic change\|label.*change.*only\|text.*change.*only\|string.*change.*only\|label.*only.*done\|nothing else\|the only change\|only.*the.*text\|just.*the.*text\|just.*the.*label\|no other change\|nothing.*else.*change\|this.*one.*change\|just this\|done\." && { score=$((score+2)); notes+=" +minimal"; }
       echo "$response" | grep -qiE "also.*refactor|also.*style|also.*fix.*loading|while.*here.*also|toast.*as well" && { score=$((score-2)); notes+=" -scope_creep"; }
       ;;
     B06)
@@ -215,8 +215,8 @@ auto_score() {
       echo "$response" | grep -qi "diagnos\|root cause\|backend\|query\|api response\|bundle\|network" && { score=$((score+2)); notes+=" +diagnosis"; }
       # Key diagnostic question: distinguishes load vs render vs submit
       echo "$response" | grep -qi "page load\|form submit\|render\|hydrat\|is it.*load\|load.*submit\|submit.*load\|interaction" && { score=$((score+2)); notes+=" +bottleneck_classification"; }
-      # Explicit stop + question
-      echo "$response" | grep -qi "STOP\|waiting.*answer\|need.*answer\|before.*proceed\|before.*plan" && { score=$((score+2)); notes+=" +explicit_stop"; }
+      # Explicit stop + question (broad: covers STOP, "which one", "once you answer", "won't guess", etc.)
+      echo "$response" | grep -qi "STOP\|waiting.*answer\|need.*answer\|before.*proceed\|before.*plan\|which one\|which.*matches\|please.*tell.*me\|let me know.*which\|after you.*tell me\|once you tell me\|after you confirm\|Which one.*matches\|tell me.*which\|can you tell me\|could you.*tell me\|once you answer\|after you answer\|once you respond\|after you respond\|once.*you.*tell\|which of the\|narrow.*this\|narrow.*enormously\|give.*concrete.*plan\|won't guess\|will not guess\|need.*to.*know\|I need to know\|before.*explore\|before.*reading.*code\|answer.*and I.ll\|answer.*these.*and\|I.ll read.*immediately\|I'll read.*after" && { score=$((score+2)); notes+=" +explicit_stop"; }
       # Different root causes explained
       echo "$response" | grep -qi "bundle size\|database.*query\|db.*query\|hydration\|server.*response\|API.*endpoint" && { score=$((score+1)); notes+=" +root_cause_map"; }
       # Penalize only if PROPOSING a UI fix as solution (not investigating existing state)
@@ -248,12 +248,12 @@ auto_score() {
       echo "$response" | grep -qi "hosting\|serverless\|vercel\|infrastructure\|long.lived" && { score=$((score+1)); notes+=" +infra_q"; }
       # Declares shadow branch approach
       echo "$response" | grep -qi "shadow branch\|implement both\|build both\|compare.*implement\|prototype.*both\|shadow/" && { score=$((score+3)); notes+=" +shadow_branch"; }
-      # Comparison criteria in plan
-      echo "$response" | grep -qi "complexity\|bundle.*delta\|auth.*integr\|error.*recov\|comparison" && { score=$((score+1)); notes+=" +comparison_criteria"; }
+      # Comparison criteria (in plan or declared intent to compare)
+      echo "$response" | grep -qi "complexity\|bundle.*delta\|auth.*integr\|error.*recov\|comparison\|will.*compare\|after.*compare\|compare.*both\|compare.*approach\|compare.*implementation\|comparing.*the.*two" && { score=$((score+1)); notes+=" +comparison_criteria"; }
       # Detailed shadow branch plan: specific branch names or tech labels
       echo "$response" | grep -qiE "shadow/.*sse|shadow/.*websocket|shadow/.*-a|shadow/.*-b|shadow.*notifications|branch.*sse.*websocket|sse.*branch.*ws|notifications-a|notifications-b" && { score=$((score+2)); notes+=" +shadow_plan_detail"; }
-      # Explicit gate (broader — covers STOP variations)
-      echo "$response" | grep -qi "AWAITING APPROVAL\|await.*approv\|approval required\|STOP.*await\|await.*answer\|awaiting.*your.*answer\|awaiting.*before.*proceed\|before.*proceed.*answer\|once.*answer.*proceed\|answer.*before.*implement" && { score=$((score+2)); notes+=" +explicit_gate"; }
+      # Explicit gate (broad — covers STOP HERE, AWAITING, need answers, etc.)
+      echo "$response" | grep -qi "AWAITING APPROVAL\|await.*approv\|approval required\|STOP.*await\|await.*answer\|awaiting.*your.*answer\|awaiting.*before.*proceed\|before.*proceed.*answer\|once.*answer.*proceed\|answer.*before.*implement\|need.*answers.*before\|answers.*before.*writing\|STOP HERE.*need\|STOP.*before.*plan\|before.*shadow.*plan\|need.*before.*implement\|need.*before.*shadow\|before.*writing.*plan" && { score=$((score+2)); notes+=" +explicit_gate"; }
       # Anti-pattern: picks one without asking AND without an approval gate
       if echo "$response" | grep -qi "websocket.*better\|sse.*better\|recommend.*websocket\|recommend.*sse\|should use websocket\|should use sse"; then
         if ! echo "$response" | grep -qi "await.*approv\|approval required\|question\|clarif\|interview\|shadow\|both"; then

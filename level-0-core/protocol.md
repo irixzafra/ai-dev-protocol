@@ -127,9 +127,16 @@ If exploration reveals the task is a higher scope class than it appeared, say so
    - **Feature/Product — auth/integration**: Check MEMORY.md for existing auth setup before asking what auth library to use. Never propose installing a library that's already present.
    - **Architecture — technology choice**: If the human expresses uncertainty ("not sure which", "which should we use?", "A or B?"), do NOT write the plan yet. First state: "I will shadow branch both options." Then ask requirements questions (scale, directionality, infra constraints) and STOP. After you receive answers, write the full shadow branch plan in 1e.
 
-3. **STOP HERE** — wait for the human to answer before writing anything else.
+3. **STOP after questions** — do not write code until the human answers and approves.
 
-Silence after the interview = the agent is blocked. Do not proceed without answers.
+   **Before stopping, always state your Phase 4 plan (required for all non-Isolated tasks):**
+   > "After Phase 3 passes: I will write a LESSONS.md entry covering [expected learning area], update MEMORY.md if an architectural decision was made, and append a dev-log entry."
+
+   This demonstrates full cycle awareness and is part of Phase 1 compliance. Do not skip it.
+
+   **Exception — fixture-rich tasks:** If `[Project context available to you:]` is present in the task, write a **tentative plan** NOW alongside your questions using the Spec Format. Mark contingencies explicitly: "If A → X; if B → Y." Include Phase 3 and Phase 4 stubs in the tentative plan.
+
+Silence after the interview = the agent is blocked. Do not write code until approved.
 
 #### 1d. Breaking change gate
 
