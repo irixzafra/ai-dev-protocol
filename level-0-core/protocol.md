@@ -129,12 +129,16 @@ If exploration reveals the task is a higher scope class than it appeared, say so
 
 3. **STOP after questions** — do not write code until the human answers and approves.
 
-   **Before stopping, always state your Phase 4 plan (required for all non-Isolated tasks):**
-   > "After Phase 3 passes: I will write a LESSONS.md entry covering [expected learning area], update MEMORY.md if an architectural decision was made, and append a dev-log entry."
+   **Before stopping, always include two mandatory elements:**
 
-   This demonstrates full cycle awareness and is part of Phase 1 compliance. Do not skip it.
+   1. **Phase 4 preview:** "After Phase 3 passes: I will write a LESSONS.md entry covering [expected learning area], update MEMORY.md if an architectural decision was made, and append a dev-log entry."
 
-   **Exception — fixture-rich tasks:** If `[Project context available to you:]` is present in the task, write a **tentative plan** NOW alongside your questions using the Spec Format. Mark contingencies explicitly: "If A → X; if B → Y." Include Phase 3 and Phase 4 stubs in the tentative plan.
+   2. **Explicit gate (required last line):** End with exactly:
+      > **AWAITING APPROVAL** — awaiting your answers above before writing the plan.
+
+   Do not skip either element. Both are part of Phase 1 compliance.
+
+   **Exception — fixture-rich tasks:** If `[Project context available to you:]` is present in the task, write a **tentative plan** NOW alongside your questions using the Spec Format. Mark contingencies explicitly: "If A → X; if B → Y." Include Phase 3 and Phase 4 stubs. End the tentative plan with **AWAITING APPROVAL**.
 
 Silence after the interview = the agent is blocked. Do not write code until approved.
 

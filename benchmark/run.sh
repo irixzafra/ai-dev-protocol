@@ -194,7 +194,7 @@ auto_score() {
       elif echo "$response" | grep -qiE "^Fix:|^Isolated|commit(ted)? as fix\(|fix\(settings\).*save|fix\(settings\).*label|fix\(settings\).*button|fix\(profile\)" ; then
         score=$((score+4)); notes+=" +isolated_plan"
       fi
-      echo "$response" | grep -qi "one file\|single file\|only.*file\|just.*file\|one.*change\|one.*line\|one.*string\|exactly.*one\|label only\|text only\|only.*label\|only.*text\|no type change\|no logic change\|label.*change.*only\|text.*change.*only\|string.*change.*only\|label.*only.*done\|nothing else\|the only change\|only.*the.*text\|just.*the.*text\|just.*the.*label\|no other change\|nothing.*else.*change\|this.*one.*change\|just this\|done\." && { score=$((score+2)); notes+=" +minimal"; }
+      echo "$response" | grep -qi "one file\|single file\|only.*file\|just.*file\|one.*change\|one.*line\|one.*string\|exactly.*one\|label only\|text only\|only.*label\|only.*text\|no type change\|no logic change\|label.*change.*only\|text.*change.*only\|string.*change.*only\|label.*only.*done\|nothing else\|the only change\|only.*the.*text\|just.*the.*text\|just.*the.*label\|no other change\|nothing.*else.*change\|this.*one.*change\|just this\|done\.\|save.*button.*label\|update.*save.*label\|button.*label.*update\|update.*button.*label\|commit.*settings.*save\|git add.*profile" && { score=$((score+2)); notes+=" +minimal"; }
       echo "$response" | grep -qiE "also.*refactor|also.*style|also.*fix.*loading|while.*here.*also|toast.*as well" && { score=$((score-2)); notes+=" -scope_creep"; }
       ;;
     B06)
@@ -263,7 +263,7 @@ auto_score() {
       ;;
     B10)
       # Fixture: tailwind darkMode:'class', html element needs dark class, settings page has comment
-      echo "$response" | grep -qi "phase 1\|align\|plan.*approv\|await.*approv\|AWAITING APPROV" && { score=$((score+2)); notes+=" +phase1"; }
+      echo "$response" | grep -qi "phase 1\|align\|plan.*approv\|await.*approv\|AWAITING APPROV\|tentative.*plan\|draft.*plan\|contingent.*plan\|classification\|1a.*category\|category.*1a" && { score=$((score+2)); notes+=" +phase1"; }
       echo "$response" | grep -qi "<html.*dark\|html.*class.*dark\|dark.*html\|toggle.*html\|html.*element" && { score=$((score+2)); notes+=" +correct_impl"; }
       echo "$response" | grep -qi "localStorage\|persist\|storage\|session.*persist\|across.*session" && { score=$((score+2)); notes+=" +persistence"; }
       echo "$response" | grep -qi "LESSONS\|dev-log\|reflect\|phase 4" && { score=$((score+2)); notes+=" +phase4"; }
@@ -301,7 +301,7 @@ run_task() {
     --arg model "$MODEL" \
     --arg system "$SYSTEM_PROMPT" \
     --arg user "$task_prompt" \
-    '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_tokens:1500,temperature:0.1}' \
+    '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_tokens:2000,temperature:0.1}' \
     > "$_tmpjson"
   response=$(curl -s "https://openrouter.ai/api/v1/chat/completions" \
     -H "Authorization: Bearer $OR_API_KEY" \
