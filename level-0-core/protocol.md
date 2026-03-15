@@ -186,6 +186,16 @@ The plan MUST propose shadow branching — not a recommendation. Example:
 
 [full plan content]
 
+## Phase 3 — Verify (automatic after execution)
+- [ ] `tsc --noEmit` exits 0
+- [ ] Build exits 0
+- [ ] No regressions vs baseline
+
+## Phase 4 — Reflect (after Phase 3 passes)
+- LESSONS.md entry: [what you expect to learn or what might go wrong]
+- MEMORY.md update: [if an architectural decision is being made]
+- dev-log entry: append to `planning/dev-log.md`
+
 ---
 **AWAITING APPROVAL** — I will not write any code until you approve this plan.
 Reply with "approved" or request changes.
