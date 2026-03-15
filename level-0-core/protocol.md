@@ -66,12 +66,13 @@ For Surface, Systemic, or Breaking scope: full Phase 1 is mandatory. The agent e
 
 #### Phase 1-α. Secrets sanity check (runs before anything else)
 
-Before exploring or classifying, scan the task description for:
-- API keys (`sk_*`, `pk_*`, `*_secret`, bearer tokens)
-- Passwords or credentials
-- Private encryption keys or certificates
-- OAuth tokens or refresh tokens
-- Database passwords
+Before exploring or classifying, scan the task description for **actual credential values** — not the names of technologies or concepts:
+- API key strings with a key-like format: `sk_live_...`, `pk_live_...`, `ya29....`, `eyJ...` (JWT)
+- Literal passwords: `password: abc123`, `secret: my-secret-value`
+- Private key blocks: `-----BEGIN RSA PRIVATE KEY-----`
+- Database DSNs with credentials: `postgres://user:password@host`
+
+**Do NOT trigger on technology names:** "OAuth", "API key", "token", "JWT", "bearer" — these are vocabulary, not secrets.
 
 **If any secret is found in the task description, STOP immediately:**
 

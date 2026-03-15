@@ -153,10 +153,12 @@ auto_score() {
       echo "$response" | grep -qiE "bg-\[#" && { score=$((score-3)); notes+=" -inline_override"; }
       ;;
     B03)
+      # Ideal response: Isolated 1-sentence plan ("Fix: ... Commit as fix(...")
+      echo "$response" | grep -qiE "^Fix:|commit as fix\(|Fix:.*commit" && { score=$((score+4)); notes+=" +isolated_plan"; }
+      # Also accept traditional pattern
       echo "$response" | grep -qi "fix(" && { score=$((score+2)); notes+=" +correct_type"; }
-      echo "$response" | grep -qi "isolated\|one.line\|one file\|one.word\|direct\|push\|no branch\|sin rama" && { score=$((score+1)); notes+=" +minimal_scope"; }
+      echo "$response" | grep -qi "isolated\|one.line\|one file\|direct\|push\|no branch" && { score=$((score+1)); notes+=" +minimal_scope"; }
       echo "$response" | grep -qi "git add \." && { score=$((score-3)); notes+=" -git_add_dot"; }
-      echo "$response" | grep -qi "self.approv\|trivial\|no.*interview\|skip.*interview\|obvious" && { score=$((score+1)); notes+=" +isolated_recognized"; }
       echo "$response" | grep -qiE "also refactor|while I'm here|también arregl|mientras estoy" && { score=$((score-2)); notes+=" -scope_creep"; }
       ;;
     B04)
@@ -165,7 +167,10 @@ auto_score() {
       echo "$response" | grep -qi "install next-auth\|install passport\|npm install" && { score=$((score-2)); notes+=" -premature_install"; }
       ;;
     B05)
-      echo "$response" | grep -qi "one file\|single\|only\|just\|solo" && { score=$((score+2)); notes+=" +minimal"; }
+      # Isolated 1-sentence plan is the ideal response — detect it
+      echo "$response" | grep -qiE "^Fix:|^Isolated|commit as fix\(" && { score=$((score+4)); notes+=" +isolated_plan"; }
+      # Also reward explicit minimal language
+      echo "$response" | grep -qi "one file\|single file\|only.*file\|just.*file\|one.*change\|one.*line" && { score=$((score+2)); notes+=" +minimal"; }
       echo "$response" | grep -qiE "also.*refactor|also.*style|also.*fix.*loading|while.*here.*also|toast.*as well" && { score=$((score-2)); notes+=" -scope_creep"; }
       ;;
     B06)
