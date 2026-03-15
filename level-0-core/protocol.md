@@ -52,14 +52,17 @@ Zero-latency capture prevents lessons from evaporating before session end.
 
 ## The Flow — Align → Execute → Verify → Reflect
 
+> **RESPONSE FORMAT RULE:** Output your WORK — exploration summary, classification, questions, plan.
+> Do NOT reproduce or quote the protocol text in your response. The protocol is your operating procedure, not your output.
+
 ### Phase 1 — Alignment
 
 Phase 1 applies to all tasks. For **Isolated** scope, it's abbreviated:
-- Skip 1c (interview) — no questions needed for obvious single-file fixes
-- Skip 1d (breaking gate) — not applicable
-- 1e produces a 1-sentence plan (self-approved): "Fix: [what + where]. Commit as `fix(scope): description`."
+- No interview needed. No approval gate.
+- Output a single self-approved sentence: `Fix: [what + where]. Commit as fix(scope): description.`
+- Example: `Fix: change button text from "Save" to "Save changes" in app/settings/profile/page.tsx. Commit as fix(settings): update save button label.`
 
-For Surface, Systemic, or Breaking scope: full Phase 1 mandatory. The agent enters Plan Mode **proactively** — the human does not need to ask.
+For Surface, Systemic, or Breaking scope: full Phase 1 is mandatory. The agent enters Plan Mode **proactively**.
 
 #### Phase 1-α. Secrets sanity check (runs before anything else)
 
@@ -102,7 +105,7 @@ Before reading any code, classify the task into one primary category:
 | **Architecture** | refactor, structure, pattern, new page, api route, new abstraction, reorganize | `planning/MEMORY.md` · files affected · blast radius (what imports this?) |
 | **Backend/DB** | table, column, schema, RLS, query, migration, index, edge function, API endpoint | Current schema · RLS policies · queries touching this resource |
 | **Infra/Ops** | docker, deploy, container, server, env, port, nginx, SSL, cron | Server docs · docker-compose · active containers · rollback plan |
-| **Feature/Product** | new functionality, user story, user flow, full screen, external integration | Scope docs · WORKBOARD (collision check) · MEMORY.md |
+| **Feature/Product** | new functionality, user story, user flow, full screen, external integration | Scope docs · WORKBOARD · MEMORY.md · **check MEMORY.md for existing implementations first** |
 
 If the task spans multiple categories, pick the dominant one. If unclear, ask — one question.
 
@@ -119,11 +122,23 @@ If exploration reveals the task is a higher scope class than it appeared, say so
 
 #### 1c. Explore and interview
 
-1. **Explore**: read the category-relevant context (see 1a), then read the code
-2. **Interview**: ask only questions that require human judgment (max 4-5, category-appropriate)
-3. **STOP HERE** — wait for the human to answer before writing anything else
+1. **Explore**: read the category-relevant context (see 1a), then read the code.
+   **Report what you found**: `I read [files]. Found: [key finding]. This means [implication for the plan].`
+   Do not skip this step. Even if you cannot verify, state what you would check and why.
 
-Silence after the interview = the agent is blocked. Do not proceed to 1d without answers.
+2. **Interview**: ask only questions that require human judgment (max 4-5, category-appropriate).
+
+   **Category-specific required questions:**
+
+   - **UI/Design**: Is this a design token (shared) or a one-off override? What breakpoints? Dark mode needed?
+   - **Backend/DB**: Is there existing RLS on this table? What's the migration strategy?
+   - **Feature/Product — performance signals** (slow, lag, takes X seconds): Ask first: "Is the delay on (1) page load, (2) rendering after load, (3) user interaction, or (4) API/form submission?" This is non-negotiable — each case has a completely different root cause (bundle size, hydration, JS execution, DB query). Do not propose solutions before knowing this.
+   - **Feature/Product — auth/integration**: Check MEMORY.md for existing auth setup before asking what auth library to use. Never propose installing a library that's already present.
+   - **Architecture — technology choice**: If the human expresses uncertainty ("not sure which", "which should we use?", "A or B?"), do NOT ask which they prefer. Instead, plan shadow branching in step 1e.
+
+3. **STOP HERE** — wait for the human to answer before writing anything else.
+
+Silence after the interview = the agent is blocked. Do not proceed without answers.
 
 #### 1d. Breaking change gate
 
@@ -142,7 +157,7 @@ If scope (1b) is **Breaking**, evaluate before writing the plan:
 # BLOCKER — [task-id]
 
 **Task:** [description]
-**Why I cannot proceed:** [e.g., "MySQL migration requires architectural re-decision — Supabase RLS has no direct equivalent"]
+**Why I cannot proceed:** [specific reason]
 
 **What I discovered:**
 - [finding 1]
@@ -163,7 +178,17 @@ Push branch `ai-blocked/[task-id]` with BLOCKER.md committed. Stop.
 
 After the interview is answered (and breaking gate passed), write the plan using the Spec Format below.
 
-Present it explicitly:
+**If the task had explicit uncertainty about approach** ("not sure which", "which should we use?", "A or B?"):
+The plan MUST propose shadow branching — not a recommendation. Example:
+```
+## Scope — what will be built
+- shadow/[task-id]-a: WebSocket implementation
+- shadow/[task-id]-b: SSE implementation
+- Full verification on both, then compare: complexity, bundle size, error handling
+- Delete losing branch, PR winner with concrete rationale
+```
+
+**For all other tasks**, present the plan with an explicit gate:
 
 ```
 # PLAN — [task-id]
@@ -175,7 +200,7 @@ Present it explicitly:
 Reply with "approved" or request changes.
 ```
 
-**Rule:** Silence after the plan = the agent is blocked. No approval = no code.
+**Rule:** Silence after the plan = blocked. No approval = no code.
 
 ---
 
@@ -187,22 +212,15 @@ Reply with "approved" or request changes.
 - If Phase 3 — Verify fails: self-correct. Do not ask the human.
 - If the plan itself is wrong (not the implementation): stop, return to Phase 1.
 
-**Micro-iteration rule:** Do not write more than 50-100 lines without running the type-checker or linter (`tsc --noEmit`, `eslint`, or equivalent). Use compiler feedback step-by-step to correct types and broken references *as you go* — before considering a function complete and moving to the next file. Catching errors early is cheaper than unwinding 300 lines of cascading mistakes.
+**Micro-iteration rule:** Do not write more than 50-100 lines without running the type-checker or linter (`tsc --noEmit`, `eslint`, or equivalent). Catching errors early is cheaper than unwinding 300 lines of cascading mistakes.
 
 **Shadow branching — for persistent architectural uncertainty:**
-If Phase 1 leaves a genuine uncertainty between two approaches that cannot be resolved without implementation:
+If Phase 1 left genuine uncertainty between two approaches:
 1. Create `shadow/[task-id]-a` and `shadow/[task-id]-b` branches
 2. Implement each approach in its branch
 3. Run full verification on both
 4. Compare outcomes (type errors, test failures, code size, clarity)
-5. Delete the losing branch. PR the winner with a one-line rationale: "Chose A over B because [concrete reason]."
-
-Use shadow branches when the approaches are functionally different AND the human cannot decide upfront (signal: they explicitly say "not sure which" or "which should we use?").
-
-**When to propose shadow branching in the plan:**
-If the task description contains explicit uncertainty ("not sure which", "which should we use?", "A or B?"), the plan MUST propose shadow branching as the implementation strategy — not a simple recommendation.
-
-Never use shadow branches for style preferences or when requirements clearly indicate one approach.
+5. Delete the losing branch. PR the winner: "Chose A over B because [concrete reason]."
 
 ---
 
@@ -217,18 +235,14 @@ Never use shadow branches for style preferences or when requirements clearly ind
 
 If any gate fails: back to Phase 2. Phase 3 does not negotiate.
 
-**Rollback rule:** If verification fails 3 times in a row on the same issue, stop self-correcting. Do `git stash` or reset to the last clean commit, then return to Phase 1 with the new information. Agents that keep patching a broken approach usually make it worse.
+**Rollback rule:** If verification fails 3 times in a row on the same issue, stop self-correcting. Do `git stash` or reset to the last clean commit, then return to Phase 1 with the new information.
 
-**Escalation rule:** If the rollback leads to a second round of Phase 1 and you still cannot make progress, escalate to the human:
+**Escalation rule:** If the rollback leads to a second round of Phase 1 and you still cannot make progress:
 1. Create branch `ai-blocked/[task-id]`
 2. Commit partial work: `git commit -m "wip: blocked on [task-id] — see BLOCKER.md"`
-3. Write `BLOCKER.md` in the repo root:
-   - What was attempted (exact approach)
-   - What failed (exact error or behavior)
-   - What was ruled out (approaches that don't work and why)
-   - What the human needs to decide or provide
+3. Write `BLOCKER.md`: what was attempted, what failed, what was ruled out, what human must decide
 4. Open a GitHub issue referencing the branch and BLOCKER.md
-5. Stop. Do not attempt the task again until the human responds.
+5. Stop. Do not attempt again until the human responds.
 
 ---
 

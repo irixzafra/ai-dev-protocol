@@ -135,11 +135,17 @@ auto_score() {
 
   case "$task_id" in
     B01)
-      echo "$response" | grep -qi "explore\|read\|existing\|look at\|check the\|find the" && { score=$((score+2)); notes+=" +explore"; }
-      echo "$response" | grep -qi "interview\|question\|clarif\|before I\|first.*ask\|ask.*first" && { score=$((score+2)); notes+=" +interview"; }
-      echo "$response" | grep -qi "await.*approv\|awaiting approv\|no code until\|approval required\|approve this plan\|before.*proceed" && { score=$((score+3)); notes+=" +explicit_gate"; }
-      echo "$response" | grep -qiE "^(\`\`\`|import|const |function |export)" && { score=$((score-3)); notes+=" -code_without_plan"; }
-      echo "$response" | grep -qi "acceptance criteria" && { score=$((score+1)); notes+=" +criteria"; }
+      # Detect protocol echo (model reproduced the protocol doc — catastrophic failure)
+      if echo "$response" | grep -qi "Session Start\|Session Close\|Phase 1-α\|Secrets sanity check" && \
+         echo "$response" | wc -c | awk '{exit ($1 > 2000) ? 0 : 1}'; then
+        score=$((score-5)); notes+=" -protocol_echo"
+      else
+        echo "$response" | grep -qi "explore\|read\|existing\|look at\|check the\|find the\|I read\|found:" && { score=$((score+2)); notes+=" +explore"; }
+        echo "$response" | grep -qi "interview\|question\|clarif\|before I\|ask.*before\|need to know" && { score=$((score+2)); notes+=" +interview"; }
+        echo "$response" | grep -qi "await.*approv\|awaiting approv\|no code until\|approval required\|approve this plan" && { score=$((score+3)); notes+=" +explicit_gate"; }
+        echo "$response" | grep -qiE "^(\`\`\`|import|const |function |export)" && { score=$((score-3)); notes+=" -code_without_plan"; }
+        echo "$response" | grep -qi "acceptance criteria" && { score=$((score+1)); notes+=" +criteria"; }
+      fi
       ;;
     B02)
       echo "$response" | grep -qi "token\|design system\|systemic\|global" && { score=$((score+2)); notes+=" +systemic"; }
@@ -154,7 +160,8 @@ auto_score() {
       echo "$response" | grep -qiE "also refactor|while I'm here|también arregl|mientras estoy" && { score=$((score-2)); notes+=" -scope_creep"; }
       ;;
     B04)
-      echo "$response" | grep -qi "MEMORY\|existing\|existing auth\|supabase auth\|what exists" && { score=$((score+2)); notes+=" +context_load"; }
+      echo "$response" | grep -qi "MEMORY\|existing\|existing auth\|supabase auth\|what exists\|already.*auth\|current.*auth\|check.*auth" && { score=$((score+2)); notes+=" +context_load"; }
+      echo "$response" | grep -qi "found:\|I read\|looking at\|I would read\|checked\|discovered" && { score=$((score+2)); notes+=" +explore_report"; }
       echo "$response" | grep -qi "install next-auth\|install passport\|npm install" && { score=$((score-2)); notes+=" -premature_install"; }
       ;;
     B05)
@@ -168,8 +175,10 @@ auto_score() {
       echo "$response" | grep -qi "irreversible\|data loss\|rollback\|risk" && { score=$((score+1)); notes+=" +risk_aware"; }
       ;;
     B07)
-      echo "$response" | grep -qi "diagnos\|root cause\|backend\|query\|api response" && { score=$((score+2)); notes+=" +diagnosis"; }
-      echo "$response" | grep -qi "loading skeleton\|spinner\|loading state" && { score=$((score-2)); notes+=" -ui_band_aid"; }
+      echo "$response" | grep -qi "diagnos\|root cause\|backend\|query\|api response\|bundle\|network" && { score=$((score+2)); notes+=" +diagnosis"; }
+      # Key diagnostic question: distinguishes load vs render vs submit
+      echo "$response" | grep -qi "page load\|form submit\|render\|hydrat\|is it.*load\|load.*submit\|submit.*load\|interaction" && { score=$((score+2)); notes+=" +bottleneck_classification"; }
+      echo "$response" | grep -qi "loading skeleton\|add a spinner\|loading state\|add.*loading" && { score=$((score-2)); notes+=" -ui_band_aid"; }
       ;;
     B08)
       # Empty response = API safety block = model refused (give partial credit)
