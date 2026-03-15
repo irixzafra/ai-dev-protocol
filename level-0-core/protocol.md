@@ -68,32 +68,19 @@ For Surface, Systemic, or Breaking scope: full Phase 1 is mandatory. The agent e
 
 #### Phase 1-α. Credential guard
 
-Check whether the user's message contains a live credential pasted inline.
+Scan only for actual credential values pasted into the user message — not concepts, technology names, or task descriptions.
 
-**A live credential** is a long (20+ chars) random-looking string a human uses to authenticate with a service. It has no human-readable meaning — it is not an English word, a variable name, a file path, a description, or a placeholder.
+**A credential value** is a long (20+ chars) random-looking string with no readable meaning. Test: could a human have typed this word by word? If yes → not a credential.
 
-**Skip immediately (not a credential) if:**
-- The message is a plain-English description of a task, bug, or feature
-- It contains only code structure, variable names, or file paths
-- It contains placeholder text like angle-bracket tokens or ellipsis suffixes
+**If the message contains only English sentences, technology names, file paths, or variable names → skip Phase 1-α entirely. Do not apply it to DB migrations, auth descriptions, or any plain-text task.**
 
-**If an actual credential value is found in the user's message, STOP immediately:**
+If you find an actual credential string in the user message:
+1. Warn the user to revoke it immediately — do NOT echo, quote, or show the credential value anywhere in your response
+2. Explain the correct implementation pattern using placeholder values (e.g. `STRIPE_SECRET_KEY=your-key-here` — never the real value)
+3. Remind them: add the real key to `.env` (gitignored) and `.env.example` with a placeholder; use `process.env.STRIPE_SECRET_KEY` in code; add to deployment secrets in their hosting provider
+4. Ask them to resubmit without the credential
 
-```
-⚠️ BLOCKED — SECRET IN PROMPT
-
-The task description contains what appears to be a live secret.
-I will not repeat, use, or reference this value anywhere.
-
-What you must do:
-1. Revoke this secret immediately if it's live
-2. Re-submit the task WITHOUT the secret value
-3. The secret should live in your .env or vault — never in a chat message
-
-I'm ready when you resubmit without the secret.
-```
-
-Do not continue to Phase 1a until the task is resubmitted without secrets.
+Do not continue to Phase 1a until resubmitted without credentials.
 
 **If no secrets found:** proceed to 1a.
 
@@ -138,7 +125,7 @@ If exploration reveals the task is a higher scope class than it appeared, say so
    - **Backend/DB**: Is there existing RLS on this table? What's the migration strategy?
    - **Feature/Product — performance signals** (slow, lag, takes X seconds): Ask first: "Is the delay on (1) page load, (2) rendering after load, (3) user interaction, or (4) API/form submission?" This is non-negotiable — each case has a completely different root cause (bundle size, hydration, JS execution, DB query). Do not propose solutions before knowing this.
    - **Feature/Product — auth/integration**: Check MEMORY.md for existing auth setup before asking what auth library to use. Never propose installing a library that's already present.
-   - **Architecture — technology choice**: If the human expresses uncertainty ("not sure which", "which should we use?", "A or B?"), declare immediately before your questions: "I will shadow branch both options and compare with real code — my questions are only about requirements." Then ask only requirements questions (scale, directionality, infra constraints). Do NOT ask which they prefer.
+   - **Architecture — technology choice**: If the human expresses uncertainty ("not sure which", "which should we use?", "A or B?"), do NOT write the plan yet. First state: "I will shadow branch both options." Then ask requirements questions (scale, directionality, infra constraints) and STOP. After you receive answers, write the full shadow branch plan in 1e.
 
 3. **STOP HERE** — wait for the human to answer before writing anything else.
 
