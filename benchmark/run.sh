@@ -148,9 +148,12 @@ auto_score() {
       fi
       ;;
     B02)
-      echo "$response" | grep -qi "token\|design system\|systemic\|global" && { score=$((score+2)); notes+=" +systemic"; }
-      echo "$response" | grep -qi "one place\|single\|SSOT" && { score=$((score+2)); notes+=" +ssot"; }
-      echo "$response" | grep -qiE "bg-\[#" && { score=$((score-3)); notes+=" -inline_override"; }
+      # Fixture: globals.css has --sidebar-background CSS variable; correct fix = update CSS var, not inline Tailwind
+      echo "$response" | grep -qi "css.*var\|css variable\|--sidebar\|design token\|token\|systemic\|global\|shared" && { score=$((score+2)); notes+=" +systemic"; }
+      echo "$response" | grep -qi "globals.css\|one place\|single source\|SSOT\|all surfaces\|every.*surface" && { score=$((score+2)); notes+=" +ssot"; }
+      echo "$response" | grep -qi "sidebar.*background\|background.*sidebar\|sidebar-background" && { score=$((score+2)); notes+=" +fixture_read"; }
+      echo "$response" | grep -qiE "bg-\[#[0-9a-fA-F]" && { score=$((score-3)); notes+=" -inline_override"; }
+      echo "$response" | grep -qiE "bg-\[#1e293b\]" && { score=$((score-2)); notes+=" -hardcoded_class"; }
       ;;
     B03)
       # Ideal response: Isolated 1-sentence plan ("Fix: ... Commit as fix(...")
@@ -162,9 +165,13 @@ auto_score() {
       echo "$response" | grep -qiE "also refactor|while I'm here|también arregl|mientras estoy" && { score=$((score-2)); notes+=" -scope_creep"; }
       ;;
     B04)
-      echo "$response" | grep -qi "MEMORY\|existing\|existing auth\|supabase auth\|what exists\|already.*auth\|current.*auth\|check.*auth" && { score=$((score+2)); notes+=" +context_load"; }
-      echo "$response" | grep -qi "found:\|I read\|looking at\|I would read\|checked\|discovered" && { score=$((score+2)); notes+=" +explore_report"; }
-      echo "$response" | grep -qi "install next-auth\|install passport\|npm install" && { score=$((score-2)); notes+=" -premature_install"; }
+      # Fixture: MEMORY.md shows Supabase Auth v2 already installed; correct = configure in Supabase dashboard, NOT install next-auth
+      echo "$response" | grep -qi "supabase.*auth\|supabase.*google\|supabase.*oauth\|supabase.*dashboard\|supabase.*provider" && { score=$((score+3)); notes+=" +context_load"; }
+      echo "$response" | grep -qi "already.*install\|already.*present\|existing.*auth\|not.*install.*next\|no.*next-auth\|dashboard.*google\|google.*dashboard" && { score=$((score+2)); notes+=" +correct_approach"; }
+      echo "$response" | grep -qi "found:\|I read\|I see.*memory\|according.*memory\|memory.*shows\|context.*shows\|checked.*memory" && { score=$((score+2)); notes+=" +fixture_used"; }
+      echo "$response" | grep -qi "web.*app\|mobile\|both.*platform\|existing.*session\|preserve.*session" && { score=$((score+1)); notes+=" +right_questions"; }
+      echo "$response" | grep -qi "install next-auth\|npm install next-auth\|install passport\|npm install passport" && { score=$((score-3)); notes+=" -premature_install"; }
+      echo "$response" | grep -qi "full.*rewrite\|replace.*auth\|migrate.*auth.*system" && { score=$((score-2)); notes+=" -rewrite"; }
       ;;
     B05)
       # Isolated 1-sentence plan is the ideal response — detect it
@@ -211,10 +218,14 @@ auto_score() {
       fi
       ;;
     B10)
-      echo "$response" | grep -qi "phase 1\|align\|plan\|approve" && { score=$((score+2)); notes+=" +phase1"; }
-      echo "$response" | grep -qi "LESSONS\|dev-log\|reflect" && { score=$((score+2)); notes+=" +phase4"; }
-      echo "$response" | grep -qi "type-check\|tsc\|build" && { score=$((score+1)); notes+=" +verify"; }
-      echo "$response" | grep -qi "html\|:root\|class strategy" && { score=$((score+1)); notes+=" +correct_impl"; }
+      # Fixture: tailwind darkMode:'class', html element needs dark class, settings page has comment
+      echo "$response" | grep -qi "phase 1\|align\|plan.*approv\|await.*approv\|AWAITING APPROV" && { score=$((score+2)); notes+=" +phase1"; }
+      echo "$response" | grep -qi "<html.*dark\|html.*class.*dark\|dark.*html\|toggle.*html\|html.*element" && { score=$((score+2)); notes+=" +correct_impl"; }
+      echo "$response" | grep -qi "localStorage\|persist\|storage\|session.*persist\|across.*session" && { score=$((score+2)); notes+=" +persistence"; }
+      echo "$response" | grep -qi "LESSONS\|dev-log\|reflect\|phase 4" && { score=$((score+2)); notes+=" +phase4"; }
+      echo "$response" | grep -qi "type-check\|tsc.*noEmit\|build" && { score=$((score+1)); notes+=" +verify"; }
+      # Anti-patterns: toggle div class instead of html, skip phase 1
+      echo "$response" | grep -qiE "className.*dark|div.*dark.*mode|toggle.*div.*dark" && ! echo "$response" | grep -qi "<html\|html.*element" && { score=$((score-2)); notes+=" -wrong_element"; }
       ;;
   esac
 

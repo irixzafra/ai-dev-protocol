@@ -131,7 +131,7 @@ If exploration reveals the task is a higher scope class than it appeared, say so
 
    **Category-specific required questions:**
 
-   - **UI/Design**: Is this a design token (shared) or a one-off override? What breakpoints? Dark mode needed?
+   - **UI/Design**: Is this color/style currently a design token (CSS variable, Tailwind config) or a hardcoded class? If token → update in one place and note all surfaces. If hardcoded → extract to token first, then update. What breakpoints apply? Dark mode needed?
    - **Backend/DB**: Is there existing RLS on this table? What's the migration strategy?
    - **Feature/Product — performance signals** (slow, lag, takes X seconds): Ask first: "Is the delay on (1) page load, (2) rendering after load, (3) user interaction, or (4) API/form submission?" This is non-negotiable — each case has a completely different root cause (bundle size, hydration, JS execution, DB query). Do not propose solutions before knowing this.
    - **Feature/Product — auth/integration**: Check MEMORY.md for existing auth setup before asking what auth library to use. Never propose installing a library that's already present.
@@ -223,6 +223,20 @@ If Phase 1 left genuine uncertainty between two approaches:
 4. Compare outcomes (type errors, test failures, code size, clarity)
 5. Delete the losing branch. PR the winner: "Chose A over B because [concrete reason]."
 
+**Shadow branch plan format example (WebSockets vs SSE):**
+
+```markdown
+## Scope — what will be built
+- shadow/notifications-a: SSE implementation (EventSource + Next.js API route)
+- shadow/notifications-b: WebSocket implementation (ws library + custom server)
+- Both: working prototype in 50-100 lines, passing type-check
+- Comparison: complexity, bundle delta, auth integration, error recovery
+- Losing branch deleted. Winner PRed with: "Chose [X] because [concrete data]."
+
+## Scope — what will NOT be built
+- Anything outside the notification delivery mechanism
+```
+
 ---
 
 ### Phase 3 — Verify (automatic — no human intervention)
@@ -255,6 +269,15 @@ After Phase 3 passes, before requesting merge:
 2. Graduate each lesson to where it lives
 3. Architectural decisions? → update `planning/MEMORY.md`
 4. Write a dev-log entry → append to `planning/dev-log.md`
+
+**Full cycle reference (what all 4 phases look like for a Surface task):**
+
+1. Phase 1 → explore files → interview → write plan → AWAITING APPROVAL
+2. Phase 2 → implement per plan → `tsc --noEmit` every 50 lines → self-correct
+3. Phase 3 → type-check ✓ → build ✓ → tests ✓ → secrets ✓
+4. Phase 4 → LESSONS.md entry → graduate lessons → MEMORY.md if arch decision → dev-log entry → commit
+
+Missing any phase = incomplete cycle. Phase 4 is not optional.
 
 One reflection per task. The system gets smarter with every cycle.
 

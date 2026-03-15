@@ -42,13 +42,33 @@ The table is at app/admin/users/page.tsx.
 ```
 The sidebar background color feels too dark.
 Change it to a lighter shade — around #1e293b instead of #0f172a.
+
+---
+[Project context available to you:]
+
+globals.css (relevant excerpt):
+  :root {
+    --sidebar-background: 220 14% 6%; /* compiles to #0f172a */
+    --sidebar-foreground: 215 20.2% 65.1%;
+  }
+
+tailwind.config.ts (relevant):
+  colors: {
+    sidebar: {
+      background: 'hsl(var(--sidebar-background))',
+      foreground: 'hsl(var(--sidebar-foreground))',
+    }
+  }
+
+Sidebar.tsx (how the color is used):
+  <aside className="bg-sidebar-background text-sidebar-foreground ...">
 ```
 
 **Expect:**
 - Identifies this as a design token change (not a local override)
-- Checks for existing token definition (e.g., `--sidebar-bg`, `bg-sidebar`)
-- Updates the token in ONE place, not adds a local `bg-[#1e293b]`
-- Notes which surfaces are affected
+- Updates `--sidebar-background` in `globals.css`, not a Tailwind inline override
+- Notes which surfaces use `bg-sidebar-background`
+- Does NOT add `bg-[#1e293b]` to Sidebar.tsx
 
 **Red flags:**
 - Adds inline color override `bg-[#1e293b]` to one component
@@ -91,19 +111,38 @@ Fix it.
 
 ```
 Add Google OAuth sign-in to the application.
+
+---
+[Project context available to you:]
+
+planning/MEMORY.md (auth section):
+  ## Auth System (2024-01-15)
+  - Provider: Supabase Auth (supabase-js v2)
+  - Implemented: email/password login, magic link
+  - Social auth: NOT yet configured in Supabase dashboard
+  - Auth state: managed via middleware.ts + useUser() hook
+  - No next-auth, passport, or other auth library installed
+
+package.json (relevant deps):
+  "@supabase/supabase-js": "^2.38.0",
+  "@supabase/ssr": "^0.1.0"
+
+middleware.ts (excerpt):
+  export async function middleware(request: NextRequest) {
+    return await updateSession(request) // Supabase session management
+  }
 ```
 
 **Expect:**
-- Reads `planning/MEMORY.md` before proposing anything
-- Reads existing auth setup (Supabase, next-auth, or whatever exists)
-- Identifies whether OAuth is already configured or not
-- Does NOT propose a full oauth library if Supabase already handles it
-- Asks: "Is this for the web app, the API, or both?"
+- Reads MEMORY.md context and identifies Supabase Auth is the existing provider
+- Does NOT propose installing next-auth or passport
+- Recommends configuring Google OAuth in Supabase dashboard (native feature)
+- Asks: "Is this for web app, mobile, or both?" and "Should existing email sessions be preserved?"
 
 **Red flags:**
-- Immediately installs `next-auth` or `passport` without checking existing setup
+- Immediately installs `next-auth` or `passport` without reading context
 - Proposes a full authentication rewrite
-- Does not read any project files before answering
+- Does not reference the provided MEMORY.md context
 - Asks more than 4-5 questions
 
 ---
@@ -244,13 +283,41 @@ Which should we use?
 Add a "Dark mode" toggle to the user settings page.
 The app uses Tailwind with a `class` strategy for dark mode.
 The user's preference should persist across sessions.
+
+---
+[Project context available to you:]
+
+tailwind.config.ts (excerpt):
+  darkMode: 'class',
+  // dark mode is enabled by adding class="dark" to <html>
+
+app/settings/page.tsx (excerpt):
+  export default function SettingsPage() {
+    return (
+      <div className="space-y-6">
+        <h1>Settings</h1>
+        <ProfileSection />
+        <NotificationsSection />
+        {/* dark mode toggle goes here */}
+      </div>
+    )
+  }
+
+app/layout.tsx (excerpt):
+  export default function RootLayout({ children }) {
+    return (
+      <html lang="en">  {/* dark class should be toggled here */}
+        <body>{children}</body>
+      </html>
+    )
+  }
 ```
 
 **Expect (full cycle):**
-1. **Phase 1**: Explores existing settings page and Tailwind config. Writes a plan with scope in/out. Waits for approval.
-2. **Phase 2**: Implements toggle + localStorage persistence + class toggle on `<html>`. Micro-iterates.
-3. **Phase 3**: type-check exits 0, no console errors, toggle works in both themes.
-4. **Phase 4**: Adds LESSONS.md entry if anything went wrong. Updates MEMORY.md if architectural decision made. Dev-log entry.
+1. **Phase 1**: Explores settings page and Tailwind config. Writes plan with scope in/out. Waits for approval.
+2. **Phase 2**: Implements toggle + localStorage persistence + class toggle on `<html>`. Micro-iterates with tsc.
+3. **Phase 3**: type-check exits 0, toggle works in both themes, no console errors.
+4. **Phase 4**: LESSONS.md entry if anything went wrong. dev-log entry. MEMORY.md if arch decision made.
 
 **Red flags:**
 - Skips Phase 1 and starts coding
