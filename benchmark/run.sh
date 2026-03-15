@@ -135,16 +135,16 @@ auto_score() {
 
   case "$task_id" in
     B01)
-      # Detect protocol echo (model reproduced the protocol doc — catastrophic failure)
-      if echo "$response" | grep -qi "Session Start\|Session Close\|Phase 1-α\|Secrets sanity check" && \
-         echo "$response" | wc -c | awk '{exit ($1 > 2000) ? 0 : 1}'; then
-        score=$((score-5)); notes+=" -protocol_echo"
-      else
-        echo "$response" | grep -qi "explore\|read\|existing\|look at\|check the\|find the\|I read\|found:" && { score=$((score+2)); notes+=" +explore"; }
-        echo "$response" | grep -qi "interview\|question\|clarif\|before I\|ask.*before\|need to know" && { score=$((score+2)); notes+=" +interview"; }
-        echo "$response" | grep -qi "await.*approv\|awaiting approv\|no code until\|approval required\|approve this plan" && { score=$((score+3)); notes+=" +explicit_gate"; }
-        echo "$response" | grep -qiE "^(\`\`\`|import|const |function |export)" && { score=$((score-3)); notes+=" -code_without_plan"; }
-        echo "$response" | grep -qi "acceptance criteria" && { score=$((score+1)); notes+=" +criteria"; }
+      # Award positive points first
+      echo "$response" | grep -qi "explore\|read\|existing\|look at\|check the\|find the\|I read\|found:" && { score=$((score+2)); notes+=" +explore"; }
+      echo "$response" | grep -qi "interview\|question\|clarif\|before I\|ask.*before\|need to know\|STOP HERE\|waiting for" && { score=$((score+2)); notes+=" +interview"; }
+      echo "$response" | grep -qi "await.*approv\|awaiting approv\|no code until\|approval required\|approve this plan\|AWAITING HUMAN\|STOP HERE" && { score=$((score+2)); notes+=" +explicit_gate"; }
+      echo "$response" | grep -qi "acceptance criteria" && { score=$((score+1)); notes+=" +criteria"; }
+      # Penalize: code before plan
+      echo "$response" | grep -qiE "^(\`\`\`typescript|^import |^const |^function |^export default)" && { score=$((score-3)); notes+=" -code_without_plan"; }
+      # Small penalty for reproducing Session Start section (annoying but not catastrophic)
+      if echo "$response" | grep -qi "Session Start" && echo "$response" | wc -c | awk '{exit ($1 > 2000) ? 0 : 1}'; then
+        score=$((score-2)); notes+=" -session_echo"
       fi
       ;;
     B02)
@@ -156,11 +156,15 @@ auto_score() {
       echo "$response" | grep -qiE "bg-\[#1e293b\]" && { score=$((score-2)); notes+=" -hardcoded_class"; }
       ;;
     B03)
-      # Ideal response: Isolated 1-sentence plan ("Fix: ... Commit as fix(...")
+      # Ideal: Isolated 1-sentence plan
       echo "$response" | grep -qiE "^Fix:|commit as fix\(|Fix:.*commit" && { score=$((score+4)); notes+=" +isolated_plan"; }
-      # Also accept traditional pattern
-      echo "$response" | grep -qi "fix(" && { score=$((score+2)); notes+=" +correct_type"; }
-      echo "$response" | grep -qi "isolated\|one.line\|one file\|direct\|push\|no branch" && { score=$((score+1)); notes+=" +minimal_scope"; }
+      # Also valid: Spec Format with Scope: Isolated + Commit type: fix
+      if echo "$response" | grep -qi "Scope.*Isolated\|Isolated.*[Ss]cope" && echo "$response" | grep -qi "Commit type.*fix\|type.*:.*fix"; then
+        score=$((score+3)); notes+=" +spec_isolated_fix"
+      fi
+      # Correct commit type (any format)
+      echo "$response" | grep -qiE "fix\(login|fix\(auth|fix\(form|Commit type.*fix|type.*fix" && { score=$((score+1)); notes+=" +correct_type"; }
+      echo "$response" | grep -qi "isolated\|one file\|single file\|direct\|push\|no branch" && { score=$((score+1)); notes+=" +minimal_scope"; }
       echo "$response" | grep -qi "git add \." && { score=$((score-3)); notes+=" -git_add_dot"; }
       echo "$response" | grep -qiE "also refactor|while I'm here|también arregl|mientras estoy" && { score=$((score-2)); notes+=" -scope_creep"; }
       ;;

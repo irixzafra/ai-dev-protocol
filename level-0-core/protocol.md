@@ -54,6 +54,8 @@ Zero-latency capture prevents lessons from evaporating before session end.
 
 > **RESPONSE FORMAT RULE:** Output your WORK — exploration summary, classification, questions, plan.
 > Do NOT reproduce or quote the protocol text in your response. The protocol is your operating procedure, not your output.
+> Session Start is a silent pre-condition (git pull, read dev-log) — do not list it. Start your response at Phase 1.
+> Phase 1c still ends with STOP and a question list — the format rule means "don't echo these instructions back", not "skip the interview gate".
 
 ### Phase 1 — Alignment
 
@@ -64,17 +66,18 @@ Phase 1 applies to all tasks. For **Isolated** scope, it's abbreviated:
 
 For Surface, Systemic, or Breaking scope: full Phase 1 is mandatory. The agent enters Plan Mode **proactively**.
 
-#### Phase 1-α. Secrets sanity check (runs before anything else)
+#### Phase 1-α. Credential guard
 
-Before exploring or classifying, scan the task description for **actual credential values** — not the names of technologies or concepts:
-- API key strings with a key-like format: `sk_live_...`, `pk_live_...`, `ya29....`, `eyJ...` (JWT)
-- Literal passwords: `password: abc123`, `secret: my-secret-value`
-- Private key blocks: `-----BEGIN RSA PRIVATE KEY-----`
-- Database DSNs with credentials: `postgres://user:password@host`
+Check whether the user's message contains a live credential pasted inline.
 
-**Do NOT trigger on technology names:** "OAuth", "API key", "token", "JWT", "bearer" — these are vocabulary, not secrets.
+**A live credential** is a long (20+ chars) random-looking string a human uses to authenticate with a service. It has no human-readable meaning — it is not an English word, a variable name, a file path, a description, or a placeholder.
 
-**If any secret is found in the task description, STOP immediately:**
+**Skip immediately (not a credential) if:**
+- The message is a plain-English description of a task, bug, or feature
+- It contains only code structure, variable names, or file paths
+- It contains placeholder text like angle-bracket tokens or ellipsis suffixes
+
+**If an actual credential value is found in the user's message, STOP immediately:**
 
 ```
 ⚠️ BLOCKED — SECRET IN PROMPT
@@ -135,7 +138,7 @@ If exploration reveals the task is a higher scope class than it appeared, say so
    - **Backend/DB**: Is there existing RLS on this table? What's the migration strategy?
    - **Feature/Product — performance signals** (slow, lag, takes X seconds): Ask first: "Is the delay on (1) page load, (2) rendering after load, (3) user interaction, or (4) API/form submission?" This is non-negotiable — each case has a completely different root cause (bundle size, hydration, JS execution, DB query). Do not propose solutions before knowing this.
    - **Feature/Product — auth/integration**: Check MEMORY.md for existing auth setup before asking what auth library to use. Never propose installing a library that's already present.
-   - **Architecture — technology choice**: If the human expresses uncertainty ("not sure which", "which should we use?", "A or B?"), do NOT ask which they prefer. Instead, plan shadow branching in step 1e.
+   - **Architecture — technology choice**: If the human expresses uncertainty ("not sure which", "which should we use?", "A or B?"), declare immediately before your questions: "I will shadow branch both options and compare with real code — my questions are only about requirements." Then ask only requirements questions (scale, directionality, infra constraints). Do NOT ask which they prefer.
 
 3. **STOP HERE** — wait for the human to answer before writing anything else.
 
