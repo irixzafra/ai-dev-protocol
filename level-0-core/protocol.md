@@ -59,12 +59,14 @@ Zero-latency capture prevents lessons from evaporating before session end.
 
 ### Phase 1 — Alignment
 
-Phase 1 applies to all tasks. For **Isolated** scope, it's abbreviated:
+Phase 1 applies to all tasks. For **Isolated** scope with a **fix/chore/docs/perf** task type, it's abbreviated:
 - No interview needed. No approval gate.
 - Output a single self-approved sentence: `Fix: [what + where]. Commit as fix(scope): description.`
 - Example: `Fix: change button text from "Save" to "Save changes" in app/settings/profile/page.tsx. Commit as fix(settings): update save button label.`
 
-For Surface, Systemic, or Breaking scope: full Phase 1 is mandatory. The agent enters Plan Mode **proactively**.
+**Important:** The abbreviated flow applies ONLY to fix/chore/docs/perf tasks. For **feat** tasks (new functionality), always use the full Phase 1 even if the scope appears single-file — new functionality requires requirements clarification before implementation.
+
+For Surface, Systemic, or Breaking scope, and for ALL feat tasks: full Phase 1 is mandatory. The agent enters Plan Mode **proactively**.
 
 #### Phase 1-α. Credential guard
 
@@ -127,20 +129,22 @@ If exploration reveals the task is a higher scope class than it appeared, say so
    - **Feature/Product — auth/integration**: Check MEMORY.md for existing auth setup before asking what auth library to use. Never propose installing a library that's already present.
    - **Architecture — technology choice**: If the human expresses uncertainty ("not sure which", "which should we use?", "A or B?"), do NOT write the plan yet. First state: "I will shadow branch both options." Then ask requirements questions (scale, directionality, infra constraints) and STOP. After you receive answers, write the full shadow branch plan in 1e.
 
-3. **STOP after questions** — do not write code until the human answers and approves.
+3. **STOP after questions** — for non-Isolated tasks and all feat tasks: do not write code until the human answers and approves.
 
-   **Before stopping, always include two mandatory elements:**
+   **For Surface, Systemic, Breaking, or any feat task — before stopping, include two mandatory elements:**
 
    1. **Phase 4 preview:** "After Phase 3 passes: I will write a LESSONS.md entry covering [expected learning area], update MEMORY.md if an architectural decision was made, and append a dev-log entry."
 
    2. **Explicit gate (required last line):** End with exactly:
       > **AWAITING APPROVAL** — awaiting your answers above before writing the plan.
 
-   Do not skip either element. Both are part of Phase 1 compliance.
+   Both elements are part of Phase 1 compliance. Do not skip them for these task types.
 
-   **Exception — fixture-rich tasks:** If `[Project context available to you:]` is present in the task, write a **tentative plan** NOW alongside your questions using the Spec Format. Mark contingencies explicitly: "If A → X; if B → Y." Include Phase 3 and Phase 4 stubs. End the tentative plan with **AWAITING APPROVAL**.
+   **Exception — fixture-rich tasks (non-Isolated):** If `[Project context available to you:]` is present, write a **tentative plan** NOW alongside your questions using the Spec Format. Mark contingencies. Include Phase 3 and Phase 4 stubs. End with **AWAITING APPROVAL**.
 
-Silence after the interview = the agent is blocked. Do not write code until approved.
+   **For Isolated fix/chore/docs/perf tasks:** Skip the interview. Skip the gate. Output the 1-liner and proceed.
+
+Silence after a non-Isolated interview = the agent is blocked. Do not write code until approved.
 
 #### 1d. Breaking change gate
 
