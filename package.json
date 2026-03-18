@@ -1,0 +1,14 @@
+{
+  "name": "ai-dev-protocol",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-tested framework for AI-assisted development",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspace=packages/mcp-server build",
+    "dev": "npm run --workspace=packages/mcp-server dev"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,51 @@
+{
+  "skill_name": "dev-update",
+  "notes": "These evals test decision quality and report format. Do NOT run evals that execute git push or pnpm update against production — use a dry-run flag or mock environment. Eval 1 (classification) and Eval 3 (report format) are safe to run. Eval 2 (full run) requires a clean git branch.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Revisa qué paquetes npm del monorepo están desactualizados y clasifícalos. No actualices nada todavía, solo el inventario y clasificación.",
+      "expected_output": "Phase 1 inventory output showing outdated packages from pnpm outdated --recursive, followed by Phase 2 classification table with each package labeled as SAFE, BREAKING, or HARDCODED-DEFER. zod must appear as HARDCODED-DEFER. isomorphic-dompurify must appear as HARDCODED-DEFER for v2→v3 jump.",
+      "files": [],
+      "assertions": [
+        "Runs pnpm outdated --recursive to inventory packages",
+        "Produces a classification table with at least SAFE, BREAKING, and HARDCODED-DEFER columns",
+        "zod is classified as HARDCODED-DEFER with explanation about contracts",
+        "Does NOT run pnpm update or git commit (inventory only mode)",
+        "Checks Docker services on your server provider via ssh your-server docker ps",
+        "Report is structured — not a wall of text"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/dev-update all",
+      "expected_output": "Full 8-phase run: inventory, classification, safe updates applied, breaking packages analyzed, type-check and build passing, git commit with structured message, final report table with all packages and their status.",
+      "files": [],
+      "assertions": [
+        "Starts with git pull origin master before any changes",
+        "Runs pnpm outdated --recursive for inventory",
+        "Applies SAFE updates but not HARDCODED-DEFER packages",
+        "Runs pnpm --filter platform type-check after updates",
+        "Runs pnpm --filter platform build before committing",
+        "Commits ONLY dependency files (package.json, pnpm-lock.yaml) — not other files",
+        "Commit message follows chore(deps): format and lists Safe/Breaking/Deferred sections",
+        "Ends with a full status table showing all packages and infrastructure",
+        "Does NOT update zod, isomorphic-dompurify v3, or @types/node major version"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "¿Están al día las dependencias de the active project?",
+      "expected_output": "Quick inventory showing current state without applying any updates. Should invoke the skill and produce a status report.",
+      "files": [],
+      "assertions": [
+        "Skill triggers on Spanish 'están al día' phrase",
+        "Runs inventory (pnpm outdated) to determine current state",
+        "Produces a clear YES/NO or status table",
+        "Does not apply updates without confirmation from user",
+        "Mentions which packages are outdated if any",
+        "Infrastructure services (Docker, your server provider) are also checked"
+      ]
+    }
+  ]
+}
