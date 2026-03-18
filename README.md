@@ -3,6 +3,15 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Version](https://img.shields.io/badge/version-v1.0.0-blue)
 
+> **Note (2026-03-18):** The protocol, skills, and templates from this repo have been absorbed into
+> [ai-workforce](https://github.com/irixzafra/ai-workforce) as the operational SSOT.
+> - Protocol → [`ai-workforce/protocol/`](https://github.com/irixzafra/ai-workforce/tree/main/protocol)
+> - Skills → [`ai-workforce/skills/`](https://github.com/irixzafra/ai-workforce/tree/main/skills) (extended with references/ and domain skills)
+> - Templates → [`ai-workforce/templates/`](https://github.com/irixzafra/ai-workforce/tree/main/templates)
+>
+> This repo remains as the **public framework and CLI** (`npx ai-dev-protocol init`).
+> For operational use with extended skills and multi-domain support, use ai-workforce.
+
 **Production-tested framework for AI-assisted development.**
 
 Rules + templates + tools that tell your AI agent how to work on your project.
