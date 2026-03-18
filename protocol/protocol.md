@@ -392,15 +392,29 @@ For FULL/AUTO, use the full format:
 
 **Incomplete deliveries** (missing post-mortem or closure checklist) are rejected. The orchestrator or owner sends them back.
 
-#### 4b. Audit log — append your row
+#### 4b. Audit log — append your entry
 
-After the post-mortem, append one row to `planning/audit-log.md` (see `templates/audit-log.template.md`):
+After the post-mortem, append one block to `planning/audit-log.md` (see `templates/audit-log.template.md`):
 
+```markdown
+### 2026-03-18 | opus-1 | S042 | FULL | 11/13
+
+| Dim | # | Result | Detail |
+|-----|---|:------:|--------|
+| A   | A1 | Y | spec S042 approved |
+| A   | A3 | N | skipped MEMORY.md |
+| B   | B2 | N | committed before lint |
+| C   | C1 | G1 G3 | G2 skipped |
+
+Failures: A3, B2
+Closure: LMWD
 ```
-| 2026-03-18 | opus-1 | S042 | FULL | 8 | Y Y N Y | Y N Y Y | ✓ ✗ ✓ - ✓ | Y Y | 11/13 | LMWD | A3,B2 | skipped MEMORY, committed before lint |
-```
 
-The audit log is **append-only**. Never edit or delete previous rows — they are the training data for the protocol.
+Only list questions with `N` or notable detail — don't list all 13 if most are `Y`. The entry should be scannable at a glance.
+
+The audit log is **append-only**. Never edit or delete previous entries — they are the training data for the protocol.
+
+**On/off switch:** If your project's CLAUDE.md contains `compliance: off`, skip the post-mortem and audit log. Use this only during emergency sprints where speed is more important than process. Re-enable after the emergency.
 
 #### 4c. Curation review — periodic pattern analysis
 
