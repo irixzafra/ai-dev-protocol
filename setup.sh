@@ -1,55 +1,97 @@
 #!/bin/bash
 # AI Dev Protocol — Setup
-# Copies protocol files to get started in any project.
-# Usage: bash setup.sh [target-directory] [--level 0|1|2]
-# Default: current directory, level 0
+# Usage:
+#   bash setup.sh [target] [--level 0|1|2]           # first install
+#   bash setup.sh [target] [--level 0|1|2] --update   # update primitives only
+#
+# --update mode: overwrites protocol primitives (dev.protocol.md, hooks,
+# framework/) but NEVER touches project-specific files (BRIEFINGS.md,
+# COORDINATION.md, WORKBOARD.md, MEMORY.md, LESSONS.md, playbook.md).
 
 set -e
 
-TARGET="${1:-.}"
-LEVEL="${2:-0}"
-REPO="https://raw.githubusercontent.com/irixzafra/ai-dev-protocol/main"
+TARGET="."
+LEVEL="0"
+UPDATE=false
 
-# Parse --level flag
-for arg in "$@"; do
-  case "$arg" in
-    --level) shift; LEVEL="${1:-0}"; shift ;;
-    0|1|2) LEVEL="$arg" ;;
+# Parse arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --level) shift; LEVEL="${1:-0}" ;;
+    --update) UPDATE=true ;;
+    0|1|2) LEVEL="$1" ;;
+    *) TARGET="$1" ;;
   esac
+  shift
 done
 
-echo "AI Dev Protocol — Setup (Level $LEVEL)"
+REPO="https://raw.githubusercontent.com/irixzafra/ai-dev-protocol/main"
+
+# Helper: download file, skip if exists and not in update mode
+install_file() {
+  local url="$1"
+  local dest="$2"
+  local type="${3:-primitive}"  # "primitive" = always overwrite on update; "project" = never overwrite
+
+  if [ -f "$dest" ]; then
+    if [ "$type" = "project" ]; then
+      echo "  SKIP $dest (project-specific, already exists)"
+      return
+    fi
+    if [ "$UPDATE" = false ]; then
+      echo "  SKIP $dest (already exists — use --update to overwrite)"
+      return
+    fi
+    echo "  UPDATE $dest"
+  else
+    echo "  CREATE $dest"
+  fi
+  curl -fsSL "$url" -o "$dest"
+}
+
+if [ "$UPDATE" = true ]; then
+  echo "AI Dev Protocol — Update (Level $LEVEL)"
+  echo "Mode: updating primitives, preserving project-specific files"
+else
+  echo "AI Dev Protocol — Setup (Level $LEVEL)"
+fi
 echo "Target: $TARGET"
 echo ""
 
 # Create directories
 mkdir -p "$TARGET/planning"
 
-# --- Level 0: Core ---
+# --- Level 0: Core (primitives — always updated) ---
 
-curl -fsSL "$REPO/protocol/protocol.md" -o "$TARGET/dev.protocol.md"
-echo "  dev.protocol.md"
+echo "Protocol primitives:"
+install_file "$REPO/protocol/protocol.md" "$TARGET/dev.protocol.md" primitive
 
-curl -fsSL "$REPO/templates/agent-config.template.md" -o "$TARGET/CLAUDE.md"
-echo "  CLAUDE.md (edit this: fill in your stack and paths)"
+# Framework docs (always update — these are universal standards)
+mkdir -p "$TARGET/docs/framework"
+for doc in README.md governance.md backlog.md testing.md design-system.md api.md database.md agents.md deployment.md spec-template.md; do
+  install_file "$REPO/protocol/framework/$doc" "$TARGET/docs/framework/$doc" primitive
+done
 
-curl -fsSL "$REPO/templates/lessons.template.md" -o "$TARGET/planning/LESSONS.md"
-echo "  planning/LESSONS.md"
+# Project-specific files — create on first install, never overwrite
+install_file "$REPO/templates/agent-config.template.md" "$TARGET/CLAUDE.md" project
+install_file "$REPO/templates/lessons.template.md" "$TARGET/planning/LESSONS.md" project
+install_file "$REPO/templates/dev-log.template.md" "$TARGET/planning/dev-log.md" project
+install_file "$REPO/templates/audit-log.template.md" "$TARGET/planning/audit-log.md" project
 
-touch "$TARGET/planning/MEMORY.md"
-echo "  planning/MEMORY.md"
+if [ ! -f "$TARGET/planning/MEMORY.md" ]; then
+  touch "$TARGET/planning/MEMORY.md"
+  echo "  CREATE planning/MEMORY.md"
+else
+  echo "  SKIP planning/MEMORY.md (project-specific, already exists)"
+fi
 
-curl -fsSL "$REPO/templates/dev-log.template.md" -o "$TARGET/planning/dev-log.md"
-echo "  planning/dev-log.md"
-
-# GitHub Issue Template for non-technical feature requests
+# GitHub Issue Template (primitive)
 mkdir -p "$TARGET/.github/ISSUE_TEMPLATE"
-curl -fsSL "$REPO/templates/feature-request.issue.md" -o "$TARGET/.github/ISSUE_TEMPLATE/feature-request.md"
-echo "  .github/ISSUE_TEMPLATE/feature-request.md"
+install_file "$REPO/templates/feature-request.issue.md" "$TARGET/.github/ISSUE_TEMPLATE/feature-request.md" primitive
 
-# OpenHands microagent
+# OpenHands microagent (primitive)
 mkdir -p "$TARGET/.openhands/microagents"
-cat > "$TARGET/.openhands/microagents/repo.md" <<'EOF'
+cat > "$TARGET/.openhands/microagents/repo.md" <<'MICROEOF'
 ---
 name: repo
 type: repo
@@ -65,7 +107,7 @@ Before doing anything:
 
 Then ask: "What should I work on?"
 If `planning/WORKBOARD.md` exists, read it for the next queued task.
-EOF
+MICROEOF
 echo "  .openhands/microagents/repo.md"
 
 # --- Level 1: Multi-agent ---
@@ -75,18 +117,12 @@ if [ "$LEVEL" -ge 1 ]; then
   echo "Level 1 — Multi-agent coordination:"
 
   mkdir -p "$TARGET/.claude"
-
-  curl -fsSL "$REPO/templates/workboard.template.md" -o "$TARGET/planning/WORKBOARD.md"
-  echo "  planning/WORKBOARD.md"
-
-  curl -fsSL "$REPO/templates/briefings.template.md" -o "$TARGET/.claude/BRIEFINGS.md"
-  echo "  .claude/BRIEFINGS.md"
-
-  curl -fsSL "$REPO/templates/coordination.template.md" -o "$TARGET/.claude/COORDINATION.md"
-  echo "  .claude/COORDINATION.md"
-
   mkdir -p "$TARGET/.claude/claims"
-  echo "  .claude/claims/ (claim lock directory)"
+
+  # Project-specific — never overwrite
+  install_file "$REPO/templates/workboard.template.md" "$TARGET/planning/WORKBOARD.md" project
+  install_file "$REPO/templates/briefings.template.md" "$TARGET/.claude/BRIEFINGS.md" project
+  install_file "$REPO/templates/coordination.template.md" "$TARGET/.claude/COORDINATION.md" project
 fi
 
 # --- Level 2: Production ---
@@ -95,17 +131,14 @@ if [ "$LEVEL" -ge 2 ]; then
   echo ""
   echo "Level 2 — Production quality:"
 
-  curl -fsSL "$REPO/templates/playbook.template.md" -o "$TARGET/playbook.md"
-  echo "  playbook.md (fill in your stack and patterns)"
-
-  curl -fsSL "$REPO/templates/program.template.md" -o "$TARGET/planning/program.md"
-  echo "  planning/program.md (autonomous optimization loop)"
+  install_file "$REPO/templates/playbook.template.md" "$TARGET/playbook.md" project
+  install_file "$REPO/templates/program.template.md" "$TARGET/planning/program.md" project
 fi
 
-# --- Git hooks ---
+# --- Git hooks (primitives — always updated) ---
 
 echo ""
-echo "Installing git hooks..."
+echo "Git hooks:"
 
 if [ -d "$TARGET/.husky" ]; then
   HOOK_DIR="$TARGET/.husky"
@@ -116,28 +149,27 @@ else
   HOOK_DIR="$TARGET/.git/hooks"
 fi
 
-curl -fsSL "$REPO/packages/hooks/pre-commit.sh" -o "$HOOK_DIR/pre-commit"
-chmod +x "$HOOK_DIR/pre-commit"
-echo "  $HOOK_DIR/pre-commit"
+for hook in pre-commit pre-push commit-msg; do
+  install_file "$REPO/packages/hooks/${hook}.sh" "$HOOK_DIR/$hook" primitive
+  chmod +x "$HOOK_DIR/$hook" 2>/dev/null || true
+done
 
-curl -fsSL "$REPO/packages/hooks/commit-msg.sh" -o "$HOOK_DIR/commit-msg"
-chmod +x "$HOOK_DIR/commit-msg"
-echo "  $HOOK_DIR/commit-msg"
-
-curl -fsSL "$REPO/packages/hooks/pre-push.sh" -o "$HOOK_DIR/pre-push"
-chmod +x "$HOOK_DIR/pre-push"
-echo "  $HOOK_DIR/pre-push"
+# --- Summary ---
 
 echo ""
-echo "Done. Next steps:"
-echo "  1. Edit CLAUDE.md — fill in your tech stack and paths"
-echo "  2. Tell your agent: 'Read dev.protocol.md before doing anything.'"
-if [ "$LEVEL" -ge 1 ]; then
-  echo "  3. Edit .claude/COORDINATION.md — define your hotspots"
-  echo "  4. Add tasks to planning/WORKBOARD.md"
-fi
-if [ "$LEVEL" -ge 2 ]; then
-  echo "  5. Edit playbook.md — your project-specific SSOT"
+if [ "$UPDATE" = true ]; then
+  echo "Update complete. Primitives refreshed, project files preserved."
+else
+  echo "Setup complete. Next steps:"
+  echo "  1. Edit CLAUDE.md — fill in your tech stack and paths"
+  echo "  2. Tell your agent: 'Read dev.protocol.md before doing anything.'"
+  if [ "$LEVEL" -ge 1 ]; then
+    echo "  3. Edit .claude/COORDINATION.md — define your hotspots"
+    echo "  4. Add tasks to planning/WORKBOARD.md"
+  fi
+  if [ "$LEVEL" -ge 2 ]; then
+    echo "  5. Edit playbook.md — your project-specific SSOT"
+  fi
 fi
 echo ""
 echo "Full docs: https://github.com/irixzafra/ai-dev-protocol"
