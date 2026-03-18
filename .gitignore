@@ -1,1 +1,6 @@
 !benchmark/results/.gitkeep
+benchmark/results/
+package-lock.json
+node_modules/
+packages/cli/dist/
+packages/mcp-server/dist/

@@ -1,122 +1,195 @@
 # AI Dev Protocol
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Version](https://img.shields.io/badge/version-v0.2.0-blue)
-![No dependencies](https://img.shields.io/badge/dependencies-none-green)
+![Version](https://img.shields.io/badge/version-v1.0.0-blue)
 
-**Un conjunto de reglas + templates que le dicen a tu agente de IA cómo trabajar en tu proyecto.**
+**Production-tested framework for AI-assisted development.**
 
-Sin código. Sin dependencias. Solo archivos Markdown que copias a tu repo y tu agente lee.
-Funciona con Claude Code, Codex, Gemini, Qwen, o cualquier LLM.
-
----
-
-## Si no eres desarrollador/a
-
-No necesitas tocar código para usar este sistema.
-
-```
-[Tú — desde el navegador]
-   → Abres GitHub y creas una tarjeta: "Quiero que los usuarios puedan restablecer su contraseña"
-   → Rellenas un formulario simple: qué quieres, quién se beneficia, qué no debe cambiar
-
-[La IA — en el servidor]
-   → Lee tu tarjeta
-   → Te pide confirmación antes de tocar nada
-   → Implementa el código, pasa los tests, cierra la tarjeta
-
-[Tú — a la mañana siguiente]
-   → Ves la tarjeta en "Hecho"
-   → Revisas el resultado
-   → Apruebas o pides ajustes con un comentario
-```
-
-El desarrollador instala el protocolo una vez. Después, tú y la IA trabajáis directamente.
-
-→ Guía completa para perfiles no técnicos: [`docs/stakeholders.md`](docs/stakeholders.md)
+Rules + templates + tools that tell your AI agent how to work on your project.
+Works with Claude Code, Codex, Gemini, Qwen, or any LLM.
 
 ---
 
-## El problema (para desarrolladores)
-
-Si usas IA para programar, estos 3 fallos te son familiares:
-
-- **Construye lo que no querías** — asumió en vez de preguntar
-- **Repite los mismos errores** — cada sesión empieza desde cero
-- **Dice "terminado" y no lo está** — sin verificación real
-
-Los 3 se resuelven con 3 reglas mínimas, aplicadas de forma consistente.
-
----
-
-## Empieza aquí — 5 minutos
+## Quick Start
 
 ```bash
-# Opción A: script automático
+# Option A: CLI (recommended)
+npx ai-dev-protocol init
+
+# Option B: setup script
 bash <(curl -fsSL https://raw.githubusercontent.com/irixzafra/ai-dev-protocol/main/setup.sh)
 
-# Opción B: manual
-cp level-0-core/protocol.md        tu-proyecto/dev.protocol.md
-cp level-0-core/templates/agent-config.template.md  tu-proyecto/CLAUDE.md
-cp level-0-core/templates/lessons.template.md       tu-proyecto/planning/LESSONS.md
+# Option C: manual
+cp protocol/protocol.md        your-project/dev.protocol.md
+cp templates/agent-config.template.md  your-project/CLAUDE.md
+cp templates/lessons.template.md       your-project/planning/LESSONS.md
 ```
 
-Luego dile a tu agente:
+Then tell your agent:
 ```
-Lee dev.protocol.md antes de hacer cualquier cosa.
+Read dev.protocol.md before doing anything.
 ```
-
-Eso es todo para empezar.
 
 ---
 
-## Cómo funciona
+## If you're not a developer
 
-Tres reglas que el agente sigue en cada tarea:
+You don't need to touch code to use this system.
 
-| Regla | Qué hace | Fallo que previene |
-|---|---|---|
-| **R1 — Alinear** | Escribe una spec, tú la apruebas, luego codifica | Construye lo que no querías |
-| **R2 — Recordar** | Cada corrección se captura en un archivo que lee siempre | Los mismos errores se repiten |
-| **R3 — Verificar** | Type-check + tests + secrets antes de "done" | Código roto llega al repo |
+```
+[You — from the browser]
+   → Open GitHub and create a ticket: "I want users to be able to reset their password"
+   → Fill a simple form: what you want, who benefits, what shouldn't change
 
-Con R1+R2+R3 ya tienes un sistema estructurado. El resto del protocolo son capas opcionales.
+[The AI — on the server]
+   → Reads your ticket
+   → Asks for confirmation before touching anything
+   → Implements the code, passes tests, closes the ticket
+
+[You — the next morning]
+   → See the ticket in "Done"
+   → Review the result
+   → Approve or request changes with a comment
+```
+
+> Complete guide for non-technical stakeholders: [`docs/stakeholders.md`](docs/stakeholders.md)
 
 ---
 
-## Nomenclatura e Industria
+## The Problem
 
-Si vienes de leer papers o usar frameworks de agentes, estos son los equivalentes exactos:
+If you use AI to code, these 3 failures are familiar:
 
-| Concepto en este protocolo | Archivo | Estándar de industria (2024-2026) |
+- **Builds what you didn't want** — assumed instead of asking
+- **Repeats the same mistakes** — each session starts from zero
+- **Says "done" and it's not** — no real verification
+
+All 3 are solved with 3 minimal rules, applied consistently.
+
+---
+
+## How It Works
+
+| Rule | What it does | Failure it prevents |
 |---|---|---|
-| Punto de entrada del agente | `CLAUDE.md` / `AGENTS.md` | Workspace Rules (`.cursorrules`, `.windsurfrules`, `copilot-instructions.md`) |
-| Aprendizaje acumulado | `LESSONS.md` | **Semantic Memory** — conocimiento persistente que el agente recupera por relevancia |
-| Memoria de sesión | `DEV_LOG.md` | **Episodic Memory** — registro temporal de eventos recientes (ventana de contexto extendida) |
-| Freno de emergencia | `BLOCKER.md` + escalation rule | **HITL Handoff** (Human-in-the-Loop) — el agente se detiene y transfiere control al humano |
-| Skills por dominio | `skills/dev-security/`, `skills/dev-design/`... | **MCP / Static Tools** — contexto especializado cargado on-demand, no siempre en el prompt |
-| Loop principal | R1 Align → R2 Execute → R3 Verify | **ReAct Loop** (Reason → Act → Observe) — el ciclo estándar de agentes autónomos |
+| **R1 — Align** | Write a spec, you approve, then code | Builds what you didn't want |
+| **R2 — Remember** | Every correction is captured in a file the agent always reads | Same mistakes repeat |
+| **R3 — Verify** | Type-check + tests + secrets before "done" | Broken code reaches the repo |
 
-El protocolo no inventa nuevos conceptos. Implementa los estándares con archivos Markdown que cualquier LLM puede leer sin plugins ni SDKs.
+---
 
-### El loop como ReAct
+## CLI Commands
+
+```bash
+devox init [--level 0|1|2]  # Bootstrap project with protocol + templates + hooks
+devox status                 # Show WORKBOARD + active claims + briefings
+devox claim <task-id>        # Atomic claim via git (prevents agent collisions)
+devox verify                 # Run all quality gates
+devox report                 # Generate delivery format
+devox briefing [show|create] # Manage agent briefings
+```
+
+---
+
+## Structure
+
+```
+ai-dev-protocol/
+├── protocol/                         <- the complete framework
+│   ├── protocol.md                   <- core development loop (R1-R3)
+│   ├── discovery.md                  <- auto-generate project playbook
+│   ├── alignment.md                  <- structured interview process
+│   ├── autonomous.md                 <- autonomous task execution
+│   ├── briefings.md                  <- multi-agent session orchestration
+│   ├── claims.md                     <- atomic anti-collision mechanism
+│   ├── self-improvement.md           <- graduation + learning loop
+│   ├── quality-flywheel.md           <- self-improving audit loop
+│   └── framework/                    <- "El Camino" — 10 standard docs
+│       ├── README.md                 <- overview, principles, 4 laws
+│       ├── governance.md             <- owner control mechanisms
+│       ├── backlog.md                <- intake, prioritization, sprints
+│       ├── testing.md                <- 3-layer verification pipeline
+│       ├── design-system.md          <- tokens, typography, layout
+│       ├── api.md                    <- response contract, validation
+│       ├── database.md               <- naming, migrations, RLS
+│       ├── agents.md                 <- skills, multi-agent coordination
+│       ├── deployment.md             <- deploy, rollback, secrets, Docker
+│       └── spec-template.md          <- product spec template
+│
+├── packages/
+│   ├── cli/                          <- CLI: npx ai-dev-protocol init
+│   ├── mcp-server/                   <- MCP orchestrator for agent coordination
+│   └── hooks/                        <- generic git hooks (secrets, scope, graduation)
+│
+├── skills/                           <- 17 domain-specific skills
+│   ├── dev-architect/                <- strategic architecture + planning
+│   ├── dev-builder/                  <- feature implementation
+│   ├── dev-qa/                       <- quality gates + dogfooding
+│   ├── dev-cycle/                    <- full lifecycle orchestration
+│   ├── dev-debug/                    <- structured debugging
+│   ├── dev-db/                       <- database operations
+│   ├── dev-design/                   <- visual design system
+│   ├── dev-ux/                       <- UX audit + heuristics
+│   ├── dev-backend/                  <- backend patterns + auth
+│   ├── dev-browser/                  <- Playwright automation
+│   ├── dev-docs-governor/            <- documentation governance
+│   ├── dev-update/                   <- dependency management
+│   ├── dev-security/                 <- OWASP Top 10
+│   ├── dev-architecture/             <- ADR/PDR patterns
+│   ├── dev-performance/              <- waterfalls, bundle, lists
+│   ├── dev-testing-strategy/         <- behavior tests
+│   └── dev-accessibility/            <- WCAG 2.1 AA
+│
+├── adapters/                         <- per-model overrides
+│   ├── universal-core.md             <- 6 rules all agents follow
+│   ├── claude.md, codex.md, gemini.md, qwen.md
+│
+├── templates/                        <- project bootstrap files
+│   ├── agent-config.template.md      <- CLAUDE.md starting point
+│   ├── lessons.template.md           <- corrections inbox
+│   ├── dev-log.template.md           <- session memory
+│   ├── workboard.template.md         <- task tracking + autonomous queue
+│   ├── briefings.template.md         <- multi-agent briefings
+│   ├── coordination.template.md      <- agent coordination
+│   ├── playbook.template.md          <- project SSOT
+│   ├── spec.template.md              <- product spec
+│   ├── adr.template.md, pdr.template.md, program.template.md
+│   └── feature-request.issue.md      <- GitHub issue for non-techs
+│
+├── benchmark/                        <- protocol quality tests (B01-B10)
+├── examples/                         <- real-world examples
+├── docs/                             <- guides and references
+├── setup.sh                          <- quick setup script
+└── package.json                      <- workspace root
+```
+
+---
+
+## Industry Nomenclature
+
+| This protocol | File | Industry standard (2024-2026) |
+|---|---|---|
+| Agent entry point | `CLAUDE.md` / `AGENTS.md` | Workspace Rules (`.cursorrules`, `.windsurfrules`) |
+| Accumulated learning | `LESSONS.md` | **Semantic Memory** |
+| Session memory | `DEV_LOG.md` | **Episodic Memory** |
+| Emergency brake | `BLOCKER.md` | **HITL Handoff** (Human-in-the-Loop) |
+| Domain skills | `skills/dev-*/` | **MCP / Static Tools** |
+| Main loop | R1 → R2 → R3 | **ReAct Loop** (Reason → Act → Observe) |
 
 ```mermaid
 flowchart LR
     A["R1 — Align\n(Reason)"] --> B["R2 — Execute\n(Act)"]
     B --> C["R3 — Verify\n(Observe)"]
-    C -->|"✅ gates pass"| D["Reflect + commit"]
-    C -->|"❌ fail ×3"| E["HITL Handoff\nBLOCKER.md"]
+    C -->|"gates pass"| D["Reflect + commit"]
+    C -->|"fail x3"| E["HITL Handoff\nBLOCKER.md"]
     D --> A
 ```
 
 ---
 
-## Compatibilidad con IDEs y herramientas
+## IDE Compatibility
 
-`CLAUDE.md` es el punto de entrada para Claude Code. El mismo archivo funciona en cualquier IDE renombrándolo:
-
-| Herramienta | Nombre del archivo |
+| Tool | Config file |
 |---|---|
 | Claude Code | `CLAUDE.md` |
 | Cursor | `.cursorrules` |
@@ -124,163 +197,48 @@ flowchart LR
 | GitHub Copilot | `.github/copilot-instructions.md` |
 | Codex / OpenAI | `AGENTS.md` |
 | Gemini | `GEMINI.md` |
-| Cualquier agente | carga `dev.protocol.md` como system prompt |
+| Any agent | load `dev.protocol.md` as system prompt |
 
-Los adaptadores en [`level-1-multi-agent/adapters/`](level-1-multi-agent/adapters/) ya incluyen las variantes por modelo.
-
----
-
-## Niveles — empieza donde estás, escala cuando lo necesites
-
-### Nivel 0 — Un agente, cualquier proyecto
-
-**Para:** cualquier dev con 1 agente de IA. Fix rápido, feature nueva, proyecto personal.
-
-**Incluye:** `protocol.md` + `LESSONS.md` + `pre-commit` lite
-
-**Setup:** 5 minutos — [ver `level-0-core/`](level-0-core/)
+Model adapters: [`adapters/`](adapters/)
 
 ---
 
-### Nivel 1 — Varios agentes o varios modelos
+## Comparison
 
-**Para:** 2+ agentes en paralelo, o cambias entre Claude/Grok/Qwen según la tarea.
-
-**Añade:**
-- Entrevista de alineación estructurada (con "non-goals" explícitos)
-- Cola de tareas con claim atómico (los agentes no se pisan)
-- Adaptadores por modelo: el protocolo funciona igual en cualquier LLM
-- `scratchpad.md` (gitignored): estado en-vuelo entre sesiones — si cambia el modelo, el siguiente agente sabe exactamente dónde se quedó el anterior
-
-**→ [`level-1-multi-agent/`](level-1-multi-agent/)**
-
----
-
-### Nivel 2 — Calidad y autonomía en producción
-
-**Para:** UI generada por IA que no puede verse genérica, loops de optimización sin supervisión, proyectos serios con múltiples skills.
-
-**Añade:**
-- Skills por dominio: backend, security, architecture, UI design
-- Playbook de proyecto (SSOT del stack y patrones específicos)
-- `program.md` — loop autónomo: init → run → log → compare → iterate
-
-**→ [`level-2-production/`](level-2-production/)**
-
----
-
-## Cuándo usar cada nivel
-
-| Situación | Nivel |
-|---|---|
-| Fix rápido en tu app personal con Claude | 0 |
-| Feature nueva — quieres spec aprobada antes de código | 0 |
-| 2+ agentes en el mismo repo sin que se pisen | 0 + 1 |
-| Cambias de modelo según la tarea | 0 + 1 |
-| UI generada que no puede parecer "genérica de IA" | 0 + 1 + 2 |
-| Optimización autónoma overnight (RAG, bundle, queries) | 0 + 1 + 2 |
-
----
-
-## Estructura
-
-```
-ai-dev-protocol/
-├── setup.sh                              ← Level 0 en un comando
-│
-├── level-0-core/                         ← las 3 reglas mínimas
-│   ├── protocol.md                       ← el loop completo
-│   ├── pre-commit                        ← hook lite: secrets + graduación
-│   ├── discovery.md                      ← genera el playbook de tu proyecto
-│   └── templates/
-│       ├── README.md                     ← qué copiar al proyecto vs qué es referencia
-│       ├── agent-config.template.md      ← config del agente (punto de partida)
-│       ├── lessons.template.md           ← inbox de correcciones
-│       ├── dev-log.template.md           ← memoria episódica (lo que pasó esta semana)
-│       ├── feature-request.issue.md      ← template de Issue para perfiles no técnicos
-│       ├── backlog.template.md           ← captura de ideas antes de ser tareas
-│       ├── adr.template.md               ← Architecture Decision Record
-│       └── pdr.template.md               ← Preliminary Design Review
-│
-├── level-1-multi-agent/                  ← coordinación + portabilidad
-│   ├── alignment.md
-│   ├── autonomous.md
-│   ├── self-improvement.md
-│   └── adapters/
-│       ├── universal-core.md             ← 6 reglas base, todos los agentes
-│       ├── claude.md
-│       ├── codex.md
-│       ├── gemini.md
-│       └── qwen.md
-│
-├── level-2-production/                   ← calidad + autonomía
-│   ├── templates/
-│   │   ├── playbook.template.md          ← SSOT del proyecto
-│   │   ├── workboard.template.md         ← tracking con cola autónoma
-│   │   └── program.template.md           ← loop de optimización
-│   └── skills/
-│       ├── dev-design/        ← 10 patrones UI de IA a eliminar
-│       ├── dev-backend/       ← 10 anti-patterns backend
-│       ├── dev-security/      ← OWASP Top 10 para agentes
-│       ├── dev-architecture/  ← ADR/PDR + anti-patterns estructurales
-│       ├── dev-performance/   ← waterfalls, listas sin virtualizar, bundle size
-│       ├── dev-accessibility/ ← WCAG 2.1 AA — los LLMs ignoran a11y por defecto
-│       └── dev-testing-strategy/ ← tests de comportamiento, no de implementación
-│
-├── examples/
-│   ├── saas-nextjs/                      ← playbook de ejemplo (Next.js + Supabase)
-│   └── protocol-evolution/               ← loop autónomo de descubrimiento de tendencias
-│
-└── docs/
-    ├── inspirations.md                   ← en qué nos basamos y qué hacemos diferente
-    ├── runtime-guide.md                  ← cómo ejecutar agentes 24/7 (VPS + FOSS)
-    ├── stakeholders.md                   ← guía para perfiles no técnicos
-    └── litellm-config.yaml               ← proxy de API con budget — el freno de emergencia
-```
-
----
-
-## Diferencias con otras aproximaciones
-
-| Problema | Boris Cherny (6 reglas) | karpathy | Este protocolo |
+| Problem | Boris Cherny (6 rules) | karpathy | This protocol |
 |---|---|---|---|
-| La IA construye lo que no querías | ⚠️ plan mode | ❌ | ✅ entrevista de alineación estructurada |
-| Las lecciones desaparecen | ⚠️ actualizar CLAUDE.md | ❌ | ✅ sistema de graduación + gate en pre-commit |
-| 4 agentes colisionando | ❌ | ❌ | ✅ mecanismo de claim atómico |
-| UI genérica de LLM | ❌ | ❌ | ✅ Uncodixify (10 patrones con alternativas) |
-| Loops de optimización autónomos | ❌ | ✅ ML only | ✅ program.md (cualquier sistema) |
-| Correcciones a mitad de sesión perdidas | ⚠️ solo al cerrar | ❌ | ✅ captura con latencia cero |
-| Funciona con múltiples LLMs | ❌ | ❌ | ✅ adaptadores por modelo |
-| Adopción progresiva | ❌ | ❌ | ✅ empieza con 3 archivos |
-| Accesible a perfiles no técnicos | ❌ | ❌ | ✅ GitHub Issues + tablero visual |
+| AI builds wrong thing | plan mode | - | structured alignment interview |
+| Lessons disappear | update CLAUDE.md | - | graduation system + pre-commit gate |
+| 4 agents colliding | - | - | atomic claim mechanism |
+| Generic AI-looking UI | - | - | Uncodixify (10 patterns + alternatives) |
+| Autonomous optimization loops | - | ML only | program.md (any system) |
+| Mid-session corrections lost | only at close | - | zero-latency capture |
+| Works with multiple LLMs | - | - | per-model adapters |
+| Progressive adoption | - | - | start with 3 files |
 
-→ Análisis completo de inspiraciones: [`docs/inspirations.md`](docs/inspirations.md)
-
-→ Cómo ejecutar agentes 24/7 con FOSS (VPS + OpenHands + LiteLLM): [`docs/runtime-guide.md`](docs/runtime-guide.md)
-
-→ Cómo exponer el sistema a perfiles no técnicos (GitHub Projects + Pages + DEV_LOG): [`docs/stakeholders.md`](docs/stakeholders.md)
+> Full analysis: [`docs/inspirations.md`](docs/inspirations.md)
 
 ---
 
-## Probado en producción
+## Tested in Production
 
-- Monorepo Next.js 15 con TypeScript strict mode
-- 4 agentes concurrentes: Claude Code, Codex, Gemini, Qwen
-- 1700+ tests, 9 quality gates en pre-commit
-- SaaS multi-tenant en beta
-
----
-
-## Contribuir
-
-Cada patrón aquí viene de uso real en producción.
-
-- **Nueva skill:** abre un issue con la plantilla "New skill suggestion"
-- **Mejora al protocolo:** issue con "Protocol improvement"
-- **El issue es la spec. El PR es la implementación.**
+- Next.js 15 monorepo with strict TypeScript
+- 4 concurrent agents: Claude Code, Codex, Gemini, Qwen
+- 1700+ tests, 9 quality gates in pre-commit
+- Multi-tenant SaaS in beta
 
 ---
 
-## Licencia
+## Contributing
+
+Every pattern here comes from real production use.
+
+- **New skill:** open an issue with the "New skill suggestion" template
+- **Protocol improvement:** issue with "Protocol improvement"
+- **The issue is the spec. The PR is the implementation.**
+
+---
+
+## License
 
 MIT
