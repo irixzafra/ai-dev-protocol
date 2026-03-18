@@ -337,6 +337,21 @@ Before closing ANY task (NANO, MINI, FULL, AUTO), answer these 5 questions **hon
 
 **Incomplete deliveries** (missing post-mortem or closure checklist) are rejected. The orchestrator or owner sends them back.
 
+#### 4b. Audit log — append your row
+
+After completing the post-mortem, append one row to `planning/audit-log.md` (created from `templates/audit-log.template.md`):
+
+```
+| 2026-03-18 | opus-1 | AUTO.07 | AUTO | 3 | Y | Y | Y | Y | N | P | S | P | - | P | 4/5 | LMWD | no | G2 lint skipped |
+```
+
+This is the data layer for pattern detection. The orchestrator or owner reviews the matrix periodically:
+- **3+ `N` in the same column** → that question's failure must graduate to enforcement
+- **3+ `S` or `F` for the same gate** → that gate needs a hook or automation
+- **Agent with avg score < 3** → needs protocol re-read or different task assignment
+
+The audit log is append-only. Never edit or delete previous rows — they are the training data for the protocol.
+
 ---
 
 **Full cycle reference (what all 4 phases look like for a Surface task):**
