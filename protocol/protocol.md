@@ -284,15 +284,61 @@ After Phase 3 passes, before requesting merge:
 2. Graduate each lesson to where it lives
 3. Architectural decisions? → update `planning/MEMORY.md`
 4. Write a dev-log entry → append to `planning/dev-log.md`
+5. **Post-mortem audit** → run the self-audit below
+
+#### 4a. Post-mortem — mandatory self-audit
+
+Before closing ANY task (NANO, MINI, FULL, AUTO), answer these 5 questions **honestly**. This is not optional — it is how the protocol improves.
+
+| # | Question | Detects |
+|---|---|---|
+| 1 | Did I work with an approved spec (docs/specs/, WORKBOARD, or tracker-backed MINI)? | Law 1 violation (Docs or it didn't happen) |
+| 2 | Did I `grep` before creating every new file? | Law 2 violation (No redundancy) |
+| 3 | Did I follow Build→Verify→Commit order (never Commit→Fix→Commit)? | Law 3 violation (Validation cascade) |
+| 4 | Did I introduce any: `any`, hardcoded hex, >300 LOC file, `console.log`, business terms in core? | Law 4 violation (Anti-patterns) |
+| 5 | Which gates did I actually run? (G1-G5 — be honest, not "I assume it passed") | Verification gap |
+
+**Scoring:**
+
+- **5/5 "yes/clean"** → no action needed. Append `Post-mortem: 5/5` to your delivery.
+- **Any "no"** → for EACH failure:
+  1. Add a lesson to `planning/LESSONS.md`:
+     ```
+     - [pending] Post-mortem: [what I did wrong]. Fix: [what should have happened].
+       Graduation target: [protocol rule / hook / enforcement that would prevent this]
+     ```
+  2. Append your honest score to delivery: `Post-mortem: 3/5 — see LESSONS.md`
+
+**Graduation trigger:** When 3+ agents report the same post-mortem failure across different tasks, that failure MUST be graduated to enforcement (hook, gate, or protocol rule update). This is not a suggestion — repeated failures that stay in LESSONS.md without graduation are themselves a protocol violation.
+
+#### Post-mortem format (include in delivery)
+
+```markdown
+## Post-mortem
+
+| # | Question | Answer |
+|---|---|---|
+| 1 | Spec/tracker? | yes / no — [detail if no] |
+| 2 | Grep before create? | yes / no — [which files] |
+| 3 | Build→Verify→Commit order? | yes / no — [where broken] |
+| 4 | Anti-patterns introduced? | clean / [list violations] |
+| 5 | Gates actually run? | G1 ✓ G2 ✗ G3 ✓ G4 N/A G5 ✓ |
+
+**Score:** X/5
+**Lessons captured:** [count] → see LESSONS.md
+**Proposed enforcement:** [if pattern repeats: what hook/gate would prevent this]
+```
+
+---
 
 **Full cycle reference (what all 4 phases look like for a Surface task):**
 
 1. Phase 1 → explore files → interview → write plan → AWAITING APPROVAL
 2. Phase 2 → implement per plan → `tsc --noEmit` every 50 lines → self-correct
 3. Phase 3 → type-check ✓ → build ✓ → tests ✓ → secrets ✓
-4. Phase 4 → LESSONS.md entry → graduate lessons → MEMORY.md if arch decision → dev-log entry → commit
+4. Phase 4 → LESSONS.md entry → graduate lessons → MEMORY.md if arch decision → dev-log entry → **post-mortem audit** → commit
 
-Missing any phase = incomplete cycle. Phase 4 is not optional.
+Missing any phase = incomplete cycle. Phase 4 is not optional. The post-mortem is not optional.
 
 One reflection per task. The system gets smarter with every cycle.
 

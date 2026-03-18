@@ -117,7 +117,25 @@ When finishing any briefing, the dev reports:
 **Matches briefing:** yes/no
 **Decisions made:** [if any unplanned]
 **Blockers found:** [if any]
+
+### Post-mortem (mandatory — see protocol/protocol.md §4a)
+
+| # | Question | Answer |
+|---|---|---|
+| 1 | Spec/tracker? | yes / no — [detail] |
+| 2 | Grep before create? | yes / no — [which files] |
+| 3 | Build→Verify→Commit order? | yes / no — [where broken] |
+| 4 | Anti-patterns introduced? | clean / [list] |
+| 5 | Gates actually run? | G1 ✓/✗  G2 ✓/✗  G3 ✓/✗  G4 N/A  G5 ✓/✗ |
+
+**Score:** X/5
+**Lessons captured:** [count] → LESSONS.md
+**MEMORY updated:** yes/no
 ```
+
+**Incomplete deliveries without the post-mortem section will be rejected by the orchestrator.**
+The post-mortem is the feedback loop that makes the protocol self-improving.
+When the same failure appears in 3+ deliveries, it graduates to enforcement (hook or gate).
 
 ---
 

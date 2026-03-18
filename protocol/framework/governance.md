@@ -168,6 +168,23 @@ Al terminar:
 3. El agente actualiza WORKBOARD.md
 4. Si hubo decisiones -> MEMORY.md
 5. Si hubo lecciones -> LESSONS.md
+6. **Post-mortem obligatorio** — el agente responde 5 preguntas de auto-auditoria (ver `protocol/protocol.md` seccion 4a)
+
+### El loop de auto-mejora
+
+El post-mortem crea un ciclo:
+
+```
+Agente termina tarea → Se audita (5 preguntas) → Reporta fallos en LESSONS.md
+                                                        ↓
+                                        3+ fallos iguales de agentes distintos
+                                                        ↓
+                                        → Se gradua a enforcement (hook o gate)
+                                        → El protocolo se actualiza
+                                        → El siguiente agente ya no puede cometer ese error
+```
+
+**Como owner:** cuando revises deliveries, mira el score del post-mortem. Si ves patron (ej: "3 agentes saltaron G2 lint"), exige que se gradúe a hook antes de la siguiente tarea.
 
 ---
 
