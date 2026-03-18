@@ -6,10 +6,10 @@
 
 ---
 
-Read the full protocol: `../PROTOCOL.md`
-Read the alignment process: `../ALIGNMENT.md`
-Read the autonomous queue: `../AUTONOMOUS.md`
-Read the self-improvement loop: `../SELF_IMPROVEMENT.md`
+Read the full protocol: `protocol/protocol.md`
+Read the alignment process: `protocol/alignment.md`
+Read the autonomous queue: `protocol/autonomous.md`
+Read the self-improvement loop: `protocol/self-improvement.md`
 
 ---
 

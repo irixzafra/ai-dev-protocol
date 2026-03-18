@@ -47,7 +47,7 @@ interface GateStatus {
 function runGates(): GateResults {
   const g1 = checkGate('tsc --noEmit', 'tsconfig.json');
   const g2 = checkGate('eslint', findEslintConfig());
-  const g3: GateStatus = { label: 'Secrets', status: 'pass' }; // Simplified for report
+  const g3 = checkSecrets();
 
   const statuses = [g1, g2, g3];
   const summary = statuses
@@ -74,6 +74,34 @@ function checkGate(tool: string, configFile: string | null): GateStatus {
     return { label, status: 'pass' };
   } catch {
     return { label, status: 'fail' };
+  }
+}
+
+const SECRET_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
+  { pattern: /sk_live_[a-zA-Z0-9]{20,}/, label: 'Stripe live key' },
+  { pattern: /ya29\.[a-zA-Z0-9._-]+/, label: 'Google OAuth token' },
+  { pattern: /-----BEGIN (RSA |EC )?PRIVATE KEY-----/, label: 'Private key' },
+  { pattern: /postgres:\/\/[^:]+:[^@]+@/, label: 'DB connection string' },
+  { pattern: /AKIA[0-9A-Z]{16}/, label: 'AWS access key' },
+  { pattern: /ghp_[a-zA-Z0-9]{36}/, label: 'GitHub PAT' },
+  { pattern: /xoxb-[0-9]+-[a-zA-Z0-9]+/, label: 'Slack bot token' },
+];
+
+function checkSecrets(): GateStatus {
+  try {
+    const diff = execSync('git diff --cached --diff-filter=d', {
+      cwd: process.cwd(),
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    for (const { pattern } of SECRET_PATTERNS) {
+      if (pattern.test(diff)) {
+        return { label: 'Secrets', status: 'fail' };
+      }
+    }
+    return { label: 'Secrets', status: 'pass' };
+  } catch {
+    return { label: 'Secrets', status: 'pass' };
   }
 }
 
