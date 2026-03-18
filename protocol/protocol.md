@@ -327,7 +327,15 @@ Before closing ANY task (NANO, MINI, FULL, AUTO), answer these 5 questions **hon
 **Score:** X/5
 **Lessons captured:** [count] → see LESSONS.md
 **Proposed enforcement:** [if pattern repeats: what hook/gate would prevent this]
+
+### Closure checklist (all mandatory)
+- [ ] LESSONS.md updated (or "no lessons this task")
+- [ ] MEMORY.md updated (or "no decisions this task")
+- [ ] WORKBOARD.md updated (task marked done)
+- [ ] dev-log.md entry appended
 ```
+
+**Incomplete deliveries** (missing post-mortem or closure checklist) are rejected. The orchestrator or owner sends them back.
 
 ---
 
@@ -369,6 +377,9 @@ Types: feat, fix, refactor, chore, docs, test, perf
 | fix/chore/docs/test/perf: direct push allowed | Run verify locally first |
 | No `git add .` or `git add -A` | Prevents accidental secret commits |
 | No `git push --force` | Irreversible |
+| Max 5 files per commit (code) | Atomicity — reviewable diffs |
+| Max 15 files per commit (FULL with approved spec) | Systemic refactors need spec authorization |
+| Batch docs exempt from file limit | Homogeneous template-based files (e.g. 6 PDR-000s) are one logical unit |
 
 ---
 
@@ -382,10 +393,12 @@ Every change goes through a verification pipeline. The depth depends on task siz
 |------|----------------|---------------|
 | G1 Type-check | `tsc --noEmit` or equivalent exits 0 | Yes |
 | G1 Build | Build command exits 0 | Yes |
-| G2 Lint | Linter exits with 0 warnings | Yes |
+| G2 Lint | Linter exits with 0 **new** warnings on files you touched | Yes |
 | G3 Secrets | No API keys, passwords, or tokens in diff | Yes (pre-commit hook) |
 
 These gates are non-negotiable. If any fails, the agent self-corrects (Phase 2) before proceeding.
+
+**G2 clarification:** Run your project's lint command (e.g. `pnpm lint`, `npx eslint .`). Pre-existing warnings in files you did NOT touch are acceptable — you are responsible for 0 new warnings in YOUR diff only. If the project has a known baseline of warnings, document it in `planning/MEMORY.md` so agents know what to expect. "I assumed tsc covers lint" is not valid — type-check (G1) and lint (G2) are separate gates.
 
 ### Layer 2 — Self-review (agent verifies before delivering)
 
