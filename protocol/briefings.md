@@ -145,6 +145,7 @@ When the same failure appears in 3+ deliveries, it graduates to enforcement (hoo
 ### Dev N — Short title
 
 **Assigned:** YYYY-MM-DD -- **Priority:** P0/P1/P2 -- **Type:** code/docs/cleanup -- **Branch:** master or name
+**Autonomy:** 🤖 full auto / 👁️ review gate / 🔒 human first
 **Gates:** G1, G2, ... (applicable from the gates table above)
 
 [Clear description of the work]
@@ -155,10 +156,15 @@ When the same failure appears in 3+ deliveries, it graduates to enforcement (hoo
 Rules:
 1. One briefing per dev at a time
 2. The dev does not start without a claim
-3. The dev reports when done using the delivery format
-4. The orchestrator reviews before assigning the next briefing
-5. If no briefing exists, the dev can claim tasks from the WORKBOARD Autonomous Queue (only `fix/chore/docs/test`)
-6. Urgent briefings: mark with `URGENT` at the start
+3. The dev respects the autonomy level:
+   - 🤖 → work and push directly
+   - 👁️ → work, open PR, wait for review
+   - 🔒 → write plan, wait for approval, then work
+4. The dev reports when done using the delivery format (including post-mortem)
+5. The orchestrator reviews before assigning the next briefing
+6. If no briefing exists, the dev can claim tasks from the WORKBOARD Autonomous Queue
+7. Urgent briefings: mark with `URGENT` at the start
+8. **An agent may NOT self-promote** its autonomy level (e.g. treat a 🔒 task as 👁️)
 
 ---
 
