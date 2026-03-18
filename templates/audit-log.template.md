@@ -1,72 +1,104 @@
-# Audit Log — Post-mortem Matrix
+# Audit Log — Compliance Matrix
 
-> **What:** Every agent appends a row after completing any task.
-> **Why:** Pattern detection — when the same failure repeats 3+ times, it graduates to enforcement.
-> **How to read:** Sort by Score ascending to find systemic weaknesses. Filter by column to find per-agent or per-gate patterns.
+> **What:** Every agent appends a row after completing any task (protocol §4b).
+> **Why:** Pattern detection — when the same failure repeats 3+, it graduates to enforcement.
+> **When to review:** Every 10 tasks or weekly (protocol §4c — curation review).
 
 ---
 
 ## Legend
 
-| Column | Values |
-|--------|--------|
-| **Size** | NANO / MINI / FULL / AUTO |
-| **Q1-Q5** | `Y` = yes/clean, `N` = no/violation, `-` = N/A |
-| **G1-G5** | `P` = pass, `F` = fail, `S` = skip, `-` = N/A |
-| **Score** | 0-5 (count of Y in Q1-Q5) |
-| **Closure** | `L` = LESSONS, `M` = MEMORY, `W` = WORKBOARD, `D` = dev-log. Uppercase = done, lowercase = skipped |
+**Task size determines which columns apply:**
 
-### Questions (Q1-Q5)
-- **Q1:** Approved spec or tracker-backed task?
-- **Q2:** Grep before creating new files?
-- **Q3:** Build→Verify→Commit order respected?
-- **Q4:** Zero anti-patterns introduced (any, hex, >300 LOC, console.log)?
-- **Q5:** All applicable gates actually run (not assumed)?
+| Size | Columns to fill |
+|------|----------------|
+| NANO | B4, C1 |
+| MINI | B1-B4, C1-C2 |
+| FULL | A1-A4, B1-B4, C1-C3, D1-D2 |
+| AUTO | A1, B1-B4, C1-C3 |
+
+**Values:** `Y` = yes/clean, `N` = no/violation, `-` = N/A for this task size
+
+**Gates (C1):** `G1 G2 G3` = gates actually run. Omit = not run.
+
+**Closure:** `L`ESSONS `M`EMORY `W`ORKBOARD `D`ev-log. Uppercase = done, lowercase = skipped.
+
+### Dimension reference
+- **A — Requirements:** A1 spec exists, A2 asked questions, A3 read context, A4 sized correctly
+- **B — Execution:** B1 grep before create, B2 build→verify→commit order, B3 scope discipline, B4 no anti-patterns
+- **C — Verification:** C1 gates run (not assumed), C2 diff matches spec, C3 state updated
+- **D — Cycle:** D1 phases in order, D2 lessons generated
 
 ---
 
 ## Matrix
 
-| Date | Agent | Task | Size | Files | Q1 | Q2 | Q3 | Q4 | Q5 | G1 | G2 | G3 | G4 | G5 | Score | Closure | Lesson graduated? | Notes |
-|------|-------|------|------|------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|------:|---------|-------------------|-------|
-| <!-- agents append rows below this line --> |
+| Date | Agent | Task | Size | Files | A1 | A2 | A3 | A4 | B1 | B2 | B3 | B4 | C1 | C2 | C3 | D1 | D2 | Score | Closure | Failures | Notes |
+|------|-------|------|------|------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:---|:--:|:--:|:--:|:--:|------:|---------|----------|-------|
+| <!-- agents: append one row per completed task below this line --> |
 
 ---
 
-## Pattern Analysis (updated when 5+ rows accumulate)
+## Pattern Analysis (fill during curation review — every 10 tasks or weekly)
 
-### Failure frequency
+### Failure frequency by question
 
-| Question | Total N | Agents affected | Graduated? | Action |
-|----------|--------:|-----------------|------------|--------|
-| Q1 Spec | | | | |
-| Q2 Grep | | | | |
-| Q3 Order | | | | |
-| Q4 Anti-patterns | | | | |
-| Q5 Gates honest | | | | |
+| Question | Description | Total N | Agents affected | Graduated? | Enforcement |
+|----------|-------------|--------:|-----------------|:----------:|-------------|
+| A1 | Spec/tracker exists | | | | |
+| A2 | Asked questions | | | | |
+| A3 | Read context | | | | |
+| A4 | Sized correctly | | | | |
+| B1 | Grep before create | | | | |
+| B2 | Build→Verify→Commit | | | | |
+| B3 | Scope discipline | | | | |
+| B4 | No anti-patterns | | | | |
+| C1 | Gates actually run | | | | |
+| C2 | Diff matches spec | | | | |
+| C3 | State updated | | | | |
+| D1 | Phases in order | | | | |
+| D2 | Lessons generated | | | | |
 
-### Gate skip frequency
+### Gate execution rate
 
-| Gate | Total S or F | Root cause | Graduated? | Action |
-|------|-------------:|------------|------------|--------|
-| G1 Type-check | | | | |
-| G2 Lint | | | | |
-| G3 Secrets | | | | |
-| G4 Browser | | | | |
-| G5 Scope | | | | |
+| Gate | Times run | Times skipped | Times failed | Skip rate | Action |
+|------|----------:|--------------:|-------------:|----------:|--------|
+| G1 Type-check | | | | | |
+| G2 Lint | | | | | |
+| G3 Secrets | | | | | |
+| G4 Browser | | | | | |
+| G5 Scope | | | | | |
 
-### Agent performance
+### Agent performance (last 30 days)
 
-| Agent | Tasks | Avg Score | Most common failure | Trend |
-|-------|------:|----------:|---------------------|-------|
+| Agent | Tasks | Avg Score | Worst dimension | Trend (vs prev period) |
+|-------|------:|----------:|-----------------|------------------------|
 | | | | | |
 
+### Performance by task size
+
+| Size | Tasks | Avg Score | Worst question | Notes |
+|------|------:|----------:|----------------|-------|
+| NANO | | | | |
+| MINI | | | | |
+| FULL | | | | |
+| AUTO | | | | |
+
 ---
 
-## Graduation log
+## Graduation Log
 
-When a pattern hits 3+ occurrences, document the enforcement here:
+When a pattern hits 3+ occurrences, the curation review graduates it to enforcement:
 
-| Date | Pattern | Occurrences | Graduated to | Commit |
-|------|---------|------------:|-------------|--------|
-| <!-- example: 2026-03-18 | G2 skipped | 4 | pre-push hook runs lint | abc1234 --> |
+| Date | Pattern | Occurrences | Graduated to | Commit | Verified? |
+|------|---------|------------:|--------------|--------|:---------:|
+| <!-- example: --> |
+| <!-- 2026-03-20 | B2 commit before verify | 5 | pre-commit hook: tsc must pass before commit allowed | abc1234 | Y --> |
+
+---
+
+## Curation Review History
+
+| Date | Tasks reviewed | Avg score | Patterns graduated | Reviewer |
+|------|---------------:|----------:|-------------------:|----------|
+| <!-- append after each curation review --> |

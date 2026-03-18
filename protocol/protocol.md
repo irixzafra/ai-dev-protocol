@@ -288,69 +288,163 @@ After Phase 3 passes, before requesting merge:
 
 #### 4a. Post-mortem — mandatory self-audit
 
-Before closing ANY task (NANO, MINI, FULL, AUTO), answer these 5 questions **honestly**. This is not optional — it is how the protocol improves.
+Before closing any task, answer the questions for your task size **honestly**. This is not optional — it is how the protocol improves itself.
+
+The audit covers 4 dimensions of the development cycle:
+
+**A. Requirements (before coding)**
 
 | # | Question | Detects |
 |---|---|---|
-| 1 | Did I work with an approved spec (docs/specs/, WORKBOARD, or tracker-backed MINI)? | Law 1 violation (Docs or it didn't happen) |
-| 2 | Did I `grep` before creating every new file? | Law 2 violation (No redundancy) |
-| 3 | Did I follow Build→Verify→Commit order (never Commit→Fix→Commit)? | Law 3 violation (Validation cascade) |
-| 4 | Did I introduce any: `any`, hardcoded hex, >300 LOC file, `console.log`, business terms in core? | Law 4 violation (Anti-patterns) |
-| 5 | Which gates did I actually run? (G1-G5 — be honest, not "I assume it passed") | Verification gap |
+| A1 | Did I have an approved spec, briefing, or tracker-backed task before starting? | Work without direction |
+| A2 | Did I ask clarification questions, or did I assume? | Incomplete requirements |
+| A3 | Did I read MEMORY.md, LESSONS.md, and playbook before planning? | Context ignored |
+| A4 | Did I classify the task size correctly? (NANO/MINI/FULL) | Scope misestimate |
 
-**Scoring:**
+**B. Execution (during work)**
 
-- **5/5 "yes/clean"** → no action needed. Append `Post-mortem: 5/5` to your delivery.
+| # | Question | Detects |
+|---|---|---|
+| B1 | Did I `grep` before creating every new file? | Duplication |
+| B2 | Did I follow Build→Verify→Commit order (never Commit→Fix→Commit)? | Broken validation cascade |
+| B3 | Did I stay within the declared scope? | Scope creep |
+| B4 | Did I introduce any: `any`, hardcoded hex, >300 LOC, `console.log`, business terms in core? | Technical debt |
+
+**C. Verification (before closing)**
+
+| # | Question | Detects |
+|---|---|---|
+| C1 | Which gates did I actually run? (G1-G5 — executed, not assumed) | Ghost gates |
+| C2 | Does `git diff --stat` match the spec? (no more, no less) | Silent deviation |
+| C3 | Did I update WORKBOARD / MEMORY / LESSONS as needed? | Lost state |
+
+**D. Cycle integrity (meta-audit)**
+
+| # | Question | Detects |
+|---|---|---|
+| D1 | Did I follow the phases in order? (Define→Plan→Build→Verify→Close) | Skipped phases |
+| D2 | Did I generate lessons if something went wrong? | Lost learning |
+
+#### Which questions apply per task size
+
+| Size | Questions required | Total |
+|------|-------------------|------:|
+| **NANO** (1-5 LOC) | B4, C1 | 2 |
+| **MINI** (fix/improvement) | B1-B4, C1-C2 | 6 |
+| **FULL** (feature) | A1-A4, B1-B4, C1-C3, D1-D2 | 13 |
+| **AUTO** (autonomous) | A1, B1-B4, C1-C3 | 8 |
+
+#### Scoring
+
+Count "yes/clean" answers. Divide by total questions for your task size.
+
+- **100%** → no action needed. Append `Post-mortem: 13/13` to delivery.
 - **Any "no"** → for EACH failure:
   1. Add a lesson to `planning/LESSONS.md`:
      ```
-     - [pending] Post-mortem: [what I did wrong]. Fix: [what should have happened].
+     - [pending] Post-mortem [task-id]: [what I did wrong]. Fix: [what should have happened].
        Graduation target: [protocol rule / hook / enforcement that would prevent this]
      ```
-  2. Append your honest score to delivery: `Post-mortem: 3/5 — see LESSONS.md`
+  2. Append your honest score to delivery: `Post-mortem: 10/13 — see LESSONS.md`
 
-**Graduation trigger:** When 3+ agents report the same post-mortem failure across different tasks, that failure MUST be graduated to enforcement (hook, gate, or protocol rule update). This is not a suggestion — repeated failures that stay in LESSONS.md without graduation are themselves a protocol violation.
+**Graduation trigger:** When 3+ agents report the same failure (same question) across different tasks, that failure MUST be graduated to enforcement (hook, gate, or protocol rule update). This is not a suggestion — repeated failures that stay in LESSONS.md without graduation are themselves a protocol violation.
 
 #### Post-mortem format (include in delivery)
 
+For NANO/MINI, use the short format:
 ```markdown
-## Post-mortem
+## Post-mortem: X/Y — [task-id]
+B4: clean | C1: G1 ✓ G3 ✓ | Notes: [if any]
+```
 
-| # | Question | Answer |
-|---|---|---|
-| 1 | Spec/tracker? | yes / no — [detail if no] |
-| 2 | Grep before create? | yes / no — [which files] |
-| 3 | Build→Verify→Commit order? | yes / no — [where broken] |
-| 4 | Anti-patterns introduced? | clean / [list violations] |
-| 5 | Gates actually run? | G1 ✓ G2 ✗ G3 ✓ G4 N/A G5 ✓ |
+For FULL/AUTO, use the full format:
+```markdown
+## Post-mortem: X/13 — [task-id]
 
-**Score:** X/5
-**Lessons captured:** [count] → see LESSONS.md
-**Proposed enforcement:** [if pattern repeats: what hook/gate would prevent this]
+| Dim | # | Answer |
+|-----|---|--------|
+| A | A1 | Y — spec S042 approved |
+| A | A2 | Y — asked 3 questions in Phase 1 |
+| A | A3 | N — skipped MEMORY.md |
+| A | A4 | Y — classified as FULL |
+| B | B1 | Y |
+| B | B2 | N — committed before lint, fixed in 2nd commit |
+| B | B3 | Y |
+| B | B4 | clean |
+| C | C1 | G1 ✓ G2 ✗ G3 ✓ G4 N/A G5 ✓ |
+| C | C2 | Y — diff matches spec |
+| C | C3 | Y |
+| D | D1 | Y |
+| D | D2 | Y — 2 lessons captured |
 
-### Closure checklist (all mandatory)
+**Lessons:** 2 → LESSONS.md
+**Proposed enforcement:** A3 failure → add MEMORY.md to session start checklist in hook
+```
+
+#### Closure checklist (all mandatory, all task sizes)
+```markdown
 - [ ] LESSONS.md updated (or "no lessons this task")
 - [ ] MEMORY.md updated (or "no decisions this task")
 - [ ] WORKBOARD.md updated (task marked done)
 - [ ] dev-log.md entry appended
+- [ ] Audit log row appended (see §4b)
 ```
 
 **Incomplete deliveries** (missing post-mortem or closure checklist) are rejected. The orchestrator or owner sends them back.
 
 #### 4b. Audit log — append your row
 
-After completing the post-mortem, append one row to `planning/audit-log.md` (created from `templates/audit-log.template.md`):
+After the post-mortem, append one row to `planning/audit-log.md` (see `templates/audit-log.template.md`):
 
 ```
-| 2026-03-18 | opus-1 | AUTO.07 | AUTO | 3 | Y | Y | Y | Y | N | P | S | P | - | P | 4/5 | LMWD | no | G2 lint skipped |
+| 2026-03-18 | opus-1 | S042 | FULL | 8 | Y Y N Y | Y N Y Y | ✓ ✗ ✓ - ✓ | Y Y | 11/13 | LMWD | A3,B2 | skipped MEMORY, committed before lint |
 ```
 
-This is the data layer for pattern detection. The orchestrator or owner reviews the matrix periodically:
-- **3+ `N` in the same column** → that question's failure must graduate to enforcement
-- **3+ `S` or `F` for the same gate** → that gate needs a hook or automation
-- **Agent with avg score < 3** → needs protocol re-read or different task assignment
+The audit log is **append-only**. Never edit or delete previous rows — they are the training data for the protocol.
 
-The audit log is append-only. Never edit or delete previous rows — they are the training data for the protocol.
+#### 4c. Curation review — periodic pattern analysis
+
+Every **10 tasks** (or weekly, whichever comes first), the orchestrator or owner runs a curation review on the audit log:
+
+**Step 1 — Count failures per question:**
+```
+grep -o "N" planning/audit-log.md | wc -l   # rough total
+# Or: scan the matrix columns manually
+```
+
+**Step 2 — Fill the pattern analysis tables** (at the bottom of audit-log.md):
+- Failure frequency by question (A1-D2)
+- Gate skip frequency (G1-G5)
+- Agent performance (avg score, trend)
+
+**Step 3 — Graduate patterns with 3+ occurrences:**
+For each pattern at 3+:
+1. Design the enforcement (hook, gate, protocol rule)
+2. Implement it
+3. Log it in the Graduation Log table
+4. The next curation review verifies the pattern stopped
+
+**Step 4 — Report to owner:**
+```markdown
+## Curation Review — [date]
+
+**Period:** [date range] | **Tasks reviewed:** [count]
+**Avg score:** X/Y ([percentage]%)
+
+### Patterns graduated this review
+| Pattern | Occurrences | Enforcement | Commit |
+|---------|-------------|-------------|--------|
+
+### Patterns approaching threshold (2 occurrences)
+| Pattern | Agents | Watch for |
+|---------|--------|-----------|
+
+### Agent health
+| Agent | Tasks | Avg | Trend |
+|-------|-------|-----|-------|
+```
+
+The curation review is itself logged in the audit-log.md Graduation Log section. This closes the loop: data → analysis → enforcement → less failures → better data.
 
 ---
 
